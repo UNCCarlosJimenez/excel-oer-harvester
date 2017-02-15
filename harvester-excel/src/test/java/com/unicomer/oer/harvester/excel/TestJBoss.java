@@ -98,11 +98,9 @@ public class TestJBoss {
 					String part2 = name.substring(0,hyphenIndex);
 					
 					if(part1.length() > part2.length()){
-						name = part1;
-						module = part2;
-					}else{
 						module = part1;
-						name = part2;
+					}else{
+						module = part2;
 					}
 				}
 			}
@@ -211,7 +209,7 @@ public class TestJBoss {
 					ModelNode deployment = deployments.next().getValue();
 					if(deployment.get("enabled").asBoolean()){
 						String deploymentName = deployment.get("runtime-name").asString();
-						logger.info("    " + deploymentName);
+//						logger.info("    " + deploymentName);
 						logger.info("    " + getVersion(deploymentName));
 					}
 				}

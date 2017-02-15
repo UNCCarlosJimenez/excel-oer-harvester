@@ -25,6 +25,7 @@ import org.jboss.as.controller.client.helpers.Operations;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
 
+import com.oracle.artifact.ArtifactAlgorithm;
 import com.oracle.oer.sync.framework.MetadataLogger;
 import com.oracle.oer.sync.framework.MetadataManager;
 import com.oracle.oer.sync.framework.MetadataReader;
@@ -41,7 +42,7 @@ public class JBossRemoteReader implements MetadataReader {
 	public List<Set<Entity>> read() throws Exception {
 		String hostname = "oraposdms.unicomer.com";
 		String username = "administrator";
-		String password = "password";
+		String password = "admin";
 		int port = 9999;
 		
 		List<Set<Entity>> result = new ArrayList<Set<Entity>>();
@@ -86,7 +87,7 @@ public class JBossRemoteReader implements MetadataReader {
         				//Obtener detalles de JVM
         				Iterator<Property> jvm = property.getValue().get("jvm").asPropertyList().iterator();
         				while(jvm.hasNext()){
-        					jvmDetails.append(jvm.next().getValue().asString()).append(System.getProperty("line.separator"));
+        					jvmDetails.append(jvm.next().getValue().asString()).append(System.getProperty("line.separator")).append(System.getProperty("line.separator"));
         				}
         				Entity serverEntity = createServerEntity(serverGroupName, jvmDetails, productInfo);
         				serverMap.put(serverGroupName, serverEntity);
@@ -126,30 +127,26 @@ public class JBossRemoteReader implements MetadataReader {
 		
 	}
 	
-	private Entity createServerEntity (String serverName, StringBuilder jvmDetails, ModelNode productInfo){
-		Entity entity = new UnicomerEntity();
+	private Entity createServerEntity (String serverName, StringBuilder jvmDetails, ModelNode productInfo) throws Exception{
 		StringBuilder description = new StringBuilder("");
 		String productVersion = Operations.readResult(productInfo).require("product-version").asString();
     	String releaseCodeName = Operations.readResult(productInfo).require("release-codename").asString();
     	String releaseVersion = Operations.readResult(productInfo).require("release-version").asString();
     	String productName = Operations.readResult(productInfo).require("product-name").asString();
 		
-    	description.append("Product Name: " + productName).append(System.getProperty("line.separator"));
-    	description.append("Product Version: " + productVersion).append(System.getProperty("line.separator"));
-    	description.append("Release Code Name: " + releaseCodeName).append(System.getProperty("line.separator"));
-    	description.append("Release Version: " + releaseVersion).append(System.getProperty("line.separator"));
-    	description.append(jvmDetails);
+    	description.append("Product Name: " + productName).append(System.getProperty("line.separator")).append(System.getProperty("line.separator"));
+    	description.append("Product Version: " + productVersion).append(System.getProperty("line.separator")).append(System.getProperty("line.separator"));
+    	description.append("Release Code Name: " + releaseCodeName).append(System.getProperty("line.separator")).append(System.getProperty("line.separator"));
+    	description.append("Release Version: " + releaseVersion).append(System.getProperty("line.separator")).append(System.getProperty("line.separator"));
+    	description.append("JVM Details: ").append(System.getProperty("line.separator")).append(jvmDetails);
     	
-		entity.setAssetType("Environment");
-		entity.setName(serverName);
-		entity.setVersion(releaseVersion);
-		entity.setDescription(description.toString());
-			
+    	Entity entity = new UnicomerEntity("Environment", serverName, serverName, description.toString(), releaseVersion,  ArtifactAlgorithm.DEFAULT);
+    	entity.addCategorization("LineOfBusiness", "InHouse : InHouse Infrastructure");
+    	entity.addCategorization("AssetLifecycleStage", "Stage 4 - Release");
 		return entity;
 	}
 	
-	private Entity createApplicationEntity (String deploymentName, Entity server){
-		Entity entity = new UnicomerEntity();
+	private Entity createApplicationEntity (String deploymentName, Entity server) throws Exception{
 		String module = "";
 		String name = "";
 		String version = "";
@@ -158,7 +155,7 @@ public class JBossRemoteReader implements MetadataReader {
 		try{
 			int i = deploymentName.lastIndexOf('.');
 			if (i >= 0) {
-			    extension = deploymentName.substring(i+1);
+				extension = deploymentName.substring(i);
 			}
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -206,11 +203,9 @@ public class JBossRemoteReader implements MetadataReader {
 					String part2 = name.substring(0,hyphenIndex);
 					
 					if(part1.length() > part2.length()){
-						name = part1;
-						module = part2;
-					}else{
 						module = part1;
-						name = part2;
+					}else{
+						module = part2;
 					}
 				}
 			}
@@ -221,14 +216,14 @@ public class JBossRemoteReader implements MetadataReader {
 			name = deploymentName;
 		}
 		
-		entity.setAssetType("Application");
-		entity.setName(name);
-		entity.setVersion(version);
+		Entity entity = new UnicomerEntity("Application", name, name, "", version,  ArtifactAlgorithm.DEFAULT);
 		entity.setDescription("Aplicacion de " + module + " cargada con Harvester, de tipo " +  extension);
-		
-		
-		entity.addRelationship(server, "deployment", false);
-		
+		entity.addRelationship(server, "Deployment", false);
+		entity.addCategorization("LineOfBusiness", "InHouse : InHouse Software");
+    	entity.addCategorization("AssetLifecycleStage", "Stage 4 - Release");
+    	entity.addCategorization("Technology", "Java EE");
+    	entity.addHarvesterProperty("Modulo", module);
+    	
 		return entity;
 	}
 	
