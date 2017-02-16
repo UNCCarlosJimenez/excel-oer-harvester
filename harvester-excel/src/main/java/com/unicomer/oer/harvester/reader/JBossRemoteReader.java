@@ -5,6 +5,7 @@ package com.unicomer.oer.harvester.reader;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +27,8 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
 
 import com.oracle.artifact.ArtifactAlgorithm;
+import com.oracle.oer.integration.harvester.RemoteQuery;
+import com.oracle.oer.sync.framework.MetadataIntrospectionConfig;
 import com.oracle.oer.sync.framework.MetadataLogger;
 import com.oracle.oer.sync.framework.MetadataManager;
 import com.oracle.oer.sync.framework.MetadataReader;
@@ -38,13 +41,33 @@ import com.unicomer.oer.harvester.model.UnicomerEntity;
  */
 public class JBossRemoteReader implements MetadataReader {
 	private static MetadataLogger logger = MetadataManager.getLogger(JBossRemoteReader.class);
+	private MetadataIntrospectionConfig config = null;
+	private String hostname = "";//"http://uinhsap1wldev.datacenter.milady.local:7091/";
+	private String username = "";//"weblogic";
+	private String password = "";//"Un1c0m3r";
+	private int port = 0;
+	
+	public JBossRemoteReader(){
+		try{
+			MetadataManager metadataManager = MetadataManager.getInstance();
+		    this.config = metadataManager.getConfigManager();
+		    RemoteQuery remote = this.config.getRemoteQuery();
+		    
+		    URI uri = new URI(remote.getUri());
+			username = remote.getCredentials().getUser();
+			password = remote.getCredentials().getPassword();
+			hostname = uri.getHost();
+			port = uri.getPort();
+		}catch(Exception e){
+			logger.error("Failure staring JBossRemoteReader... " + e.getMessage());
+			hostname = "oraposdms.unicomer.com";
+			port = 9990;
+			username = "administrator";
+			password = "admin";
+		}
+	}
 	
 	public List<Set<Entity>> read() throws Exception {
-		String hostname = "oraposdms.unicomer.com";
-		String username = "administrator";
-		String password = "admin";
-		int port = 9999;
-		
 		List<Set<Entity>> result = new ArrayList<Set<Entity>>();
 		HashMap<String, Entity> serverMap = new HashMap<String, Entity>();
 		HashMap<String, Entity> applicationMap = new HashMap<String, Entity>();
@@ -139,10 +162,16 @@ public class JBossRemoteReader implements MetadataReader {
     	description.append("Release Code Name: " + releaseCodeName).append(System.getProperty("line.separator")).append(System.getProperty("line.separator"));
     	description.append("Release Version: " + releaseVersion).append(System.getProperty("line.separator")).append(System.getProperty("line.separator"));
     	description.append("JVM Details: ").append(System.getProperty("line.separator")).append(jvmDetails);
+    	String[] keywords = {"JBoss server","AIX", "InHouse"};
     	
-    	Entity entity = new UnicomerEntity("Environment", serverName, serverName, description.toString(), releaseVersion,  ArtifactAlgorithm.DEFAULT);
+    	Entity entity = new UnicomerEntity("Environment", serverName, serverName + " - JBoss", description.toString(), productVersion,  ArtifactAlgorithm.DEFAULT);
     	entity.addCategorization("LineOfBusiness", "InHouse : InHouse Infrastructure");
     	entity.addCategorization("AssetLifecycleStage", "Stage 4 - Release");
+    	entity.addCustomData("client-platrorms", "LINUX");
+    	entity.addCustomData("client-platrorms", "UNIX");
+    	entity.addCustomData("constraints", "None");
+    	entity.setKeywords(keywords);
+    	
 		return entity;
 	}
 	
@@ -216,6 +245,8 @@ public class JBossRemoteReader implements MetadataReader {
 			name = deploymentName;
 		}
 		
+		String[] keywords = {"Test Environment", "InHouse", "Unicomer Harvester"};
+		
 		Entity entity = new UnicomerEntity("Application", name, name, "", version,  ArtifactAlgorithm.DEFAULT);
 		entity.setDescription("Aplicacion de " + module + " cargada con Harvester, de tipo " +  extension);
 		entity.addRelationship(server, "Deployment", false);
@@ -223,7 +254,10 @@ public class JBossRemoteReader implements MetadataReader {
     	entity.addCategorization("AssetLifecycleStage", "Stage 4 - Release");
     	entity.addCategorization("Technology", "Java EE");
     	entity.addHarvesterProperty("Modulo", module);
-    	
+    	entity.addCustomData("acquisition-method", "Internally Developed");
+    	entity.addCustomData("dbmss", "[Oracle Database Server 1]");
+    	entity.setKeywords(keywords);
+    	    	
 		return entity;
 	}
 	

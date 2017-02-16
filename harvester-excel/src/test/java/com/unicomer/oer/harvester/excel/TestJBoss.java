@@ -2,6 +2,7 @@ package com.unicomer.oer.harvester.excel;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class TestJBoss {
 	private static MetadataLogger logger = MetadataManager.getLogger(TestJBoss.class);
 	
 	public static void main(String[] args) throws Exception {		
-		// JBossRemoteReader reader = new JBossRemoteReader();
+//		JBossRemoteReader reader = new JBossRemoteReader();
 		init();
 		
 //		System.out.println(getVersion("ejb-securityclient-1.4.0-snapshot.jar"));
@@ -149,11 +150,11 @@ public class TestJBoss {
 	}
 
 	private static void init() throws Exception {
-		String host = "oraposdms.unicomer.com";
-		int port = 9999;
+		URI uri = new URI("http://oraposdms.unicomer.com:9999");
+		int port = uri.getPort();
 		String username = "administrator";
 		String password = "admin";
-		ModelControllerClient client = createClient(InetAddress.getByName(host), port, username, password.toCharArray(), "ManagementRealm");
+		ModelControllerClient client = createClient(InetAddress.getByName(uri.getHost()), port, username, password.toCharArray(), "ManagementRealm");
 		logger.info("Conexion establecida!");
 		try {
 			ModelNode op = new ModelNode();

@@ -22,6 +22,8 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
 import com.oracle.artifact.ArtifactAlgorithm;
+import com.oracle.oer.integration.harvester.RemoteQuery;
+import com.oracle.oer.sync.framework.MetadataIntrospectionConfig;
 import com.oracle.oer.sync.framework.MetadataIntrospectionException;
 import com.oracle.oer.sync.framework.MetadataLogger;
 import com.oracle.oer.sync.framework.MetadataManager;
@@ -33,12 +35,16 @@ import com.unicomer.oer.harvester.model.UnicomerEntity;
  * @author carlosj_rodriguez
  *
  */
-public class WebLogicDeploymentRemoteReader implements MetadataReader {
-	private static MetadataLogger logger = MetadataManager.getLogger(WebLogicDeploymentRemoteReader.class);
+public class WebLogicRemoteReader implements MetadataReader {
+	private static MetadataLogger logger = MetadataManager.getLogger(WebLogicRemoteReader.class);
+	private MetadataIntrospectionConfig config = null;
+	private String urlString = "";//"http://uinhsap1wldev.datacenter.milady.local:7091/";
+	private String username = "";//"weblogic";
+	private String password = "";//"Un1c0m3r";
 	
 	@SuppressWarnings("resource")
 	public static void main(String[] args) throws Exception {
-		WebLogicDeploymentRemoteReader reader = new WebLogicDeploymentRemoteReader();
+		WebLogicRemoteReader reader = new WebLogicRemoteReader();
 		
 		Iterator<Set<Entity>> it= reader.read().iterator();
 		while (it.hasNext()){
@@ -50,6 +56,24 @@ public class WebLogicDeploymentRemoteReader implements MetadataReader {
 		}
 	}
 	
+	public WebLogicRemoteReader(){
+		try{
+			MetadataManager metadataManager = MetadataManager.getInstance();
+		    this.config = metadataManager.getConfigManager();
+		    RemoteQuery remote = this.config.getRemoteQuery();
+		    
+		    urlString = remote.getUri();
+			username = remote.getCredentials().getUser();
+			password = remote.getCredentials().getPassword();
+		}catch(Exception e){
+			logger.error("Failure staring WebLogicDeploymentRemoteReader... " + e.getMessage());
+			
+			urlString = "http://uinhsap1wldev.datacenter.milady.local:7091/";
+			username = "weblogic";
+			password = "Un1c0m3r";
+		}
+	}
+	
 	public List<Set<Entity>> read() throws Exception {
 		List<Set<Entity>> list = new ArrayList<Set<Entity>>();
 		
@@ -58,9 +82,6 @@ public class WebLogicDeploymentRemoteReader implements MetadataReader {
 		HashMap<String, Entity> libraryMap = new HashMap<String, Entity>();
 		
 		try{
-			String urlString = "http://uinhsap1wldev.datacenter.milady.local:7091/";
-			String username = "weblogic";
-			String password = "Un1c0m3r";
 			final ObjectName service;
 			String jndiPath = "/jndi/weblogic.management.mbeanservers.domainruntime";// "/jndi/weblogic.management.mbeanservers.runtime";
 			UnicomerEntity serverEntity = null;
@@ -87,7 +108,6 @@ public class WebLogicDeploymentRemoteReader implements MetadataReader {
 //				logger.info("  Aplicaciones desplegadas:");
 				ObjectName[] applicationRuntimes = (ObjectName[]) mbconn.getAttribute(serverRuntime, "ApplicationRuntimes");
 				for (ObjectName applicationRuntime:applicationRuntimes) {
-					String path ="";
 					String applicationName = (String) mbconn.getAttribute(applicationRuntime, "Name");
 					if (applicationMap.containsKey(applicationName)){
 						//Se actualiza la referencia
@@ -195,11 +215,11 @@ public class WebLogicDeploymentRemoteReader implements MetadataReader {
 				throw new MetadataIntrospectionException(
 						"Invalid argument: -remote_url.  Expected a URL in the form of <host>:<port>");
 			}
-
+			
 			JMXServiceURL serviceURL = new JMXServiceURL(lProtocol, uri.getHost(), uri.getPort(), jndiPath);
-
+			
 			logger.info(new StringBuilder().append("Connecting to: ").append(serviceURL).toString());
-			Hashtable h = new Hashtable();
+			Hashtable<String, String> h = new Hashtable<String, String>();
 			h.put("java.naming.security.principal", username);
 			h.put("java.naming.security.credentials", password);
 			h.put("jmx.remote.protocol.provider.pkgs", "weblogic.management.remote");
@@ -221,8 +241,7 @@ public class WebLogicDeploymentRemoteReader implements MetadataReader {
 	}
 
 	public void close() throws IOException {
-		// TODO Auto-generated method stub
-		
+				
 	}
 
 }
