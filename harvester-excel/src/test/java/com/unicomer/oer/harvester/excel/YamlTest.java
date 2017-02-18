@@ -24,7 +24,7 @@ public class YamlTest {
 		try (InputStream input = new FileInputStream(fileLocation)) {
 			logger.info("Start!");
 			Set<Entity> entitySet = new HashSet<Entity>();
-//
+			
 //			Yaml yaml = new Yaml(new SafeConstructor());
 //			yaml.loadAll(input).forEach( System.out::println );
 //			
