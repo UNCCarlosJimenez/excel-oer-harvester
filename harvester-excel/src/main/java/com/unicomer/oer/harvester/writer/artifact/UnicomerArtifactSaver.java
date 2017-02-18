@@ -49,11 +49,9 @@ public class UnicomerArtifactSaver {
 				//Asset encontrado, se actualiza
 				logger.debug(name + " fue encontrado (" + matches.length + "), se actualiza");
 				for (Asset match : matches) {
-					deleteArtifactMetadataEntries(match);
-					
+					deleteArtifactMetadataEntries(match);					
 //					String artifactName = getArtifactName(tr.getDiscriminator(), name);
 //					setArtifactInformation(artifactName, relativeURI, downloadURI, transformedContent, sfid, match);
-					
 					String matchDescription = match.getDescription() == null ? "" : match.getDescription();
 					if ((description != null) && (!matchDescription.equals(description))
 							&& (matchDescription.indexOf(description) < 0)) {
@@ -69,16 +67,12 @@ public class UnicomerArtifactSaver {
 					
 					logger.info("********************************oerWriter.assetUpdate********************************");
 					logger.info("name: "+match.getName());
-					logger.info("description: "+match.getDescription());
 					logger.info("version: "+match.getVersion());
 					logger.info("************************************************************************************");
 					
 					match = oerWriter.saveCustomAttributes(entity, match);
-					logger.info("********************************oerWriter.saveCustomAttributes********************************");
 					logger.info("name: "+match.getName());
-					logger.info("description: "+match.getDescription());
 					logger.info("version: "+match.getVersion());
-					logger.info("************************************************************************************");
 					
 					oerWriter.saveAttributes(match, entity, publishedDate);
 					oerWriter.applyCategorizations(match, false);
@@ -87,7 +81,6 @@ public class UnicomerArtifactSaver {
 					
 					results.add(match);
 				}
-
 			} else {
 				logger.debug(name + " no fue encontrado, se crea");
 				//Asset no encontrado, se crea
@@ -98,7 +91,6 @@ public class UnicomerArtifactSaver {
 				Asset artifactAsset = oerWriter.assetCreate(name, version, assetTypeID, entity, publishedDate);
 				logger.info("********************************oerWriter.assetCreate********************************");
 				logger.info("name: "+artifactAsset.getName());
-				logger.info("description: "+artifactAsset.getDescription());
 				logger.info("version: "+artifactAsset.getVersion());
 				
 				artifactAsset.setDescription(description);
@@ -115,7 +107,7 @@ public class UnicomerArtifactSaver {
 				logger.info("saveCustomAttributes Done!");
 				
 				oerWriter.setProducingProjects(artifactAsset);
-				logger.info("setProducingProjects Done!");
+				logger.info("Producing projects Done!");
 				
 				logger.info("************************************************************************************");
 				results.add(artifactAsset);

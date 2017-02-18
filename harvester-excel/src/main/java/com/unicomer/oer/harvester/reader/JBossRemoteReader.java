@@ -34,6 +34,7 @@ import com.oracle.oer.sync.framework.MetadataManager;
 import com.oracle.oer.sync.framework.MetadataReader;
 import com.oracle.oer.sync.model.Entity;
 import com.unicomer.oer.harvester.model.UnicomerEntity;
+import com.unicomer.oer.harvester.writer.YamlWriter;
 
 /**
  * @author carlosj_rodriguez
@@ -123,7 +124,7 @@ public class JBossRemoteReader implements MetadataReader {
         						String deploymentName = deployment.get("runtime-name").asString();
         						logger.info("    " + deploymentName);
         						Entity applicationEntity = createApplicationEntity(deploymentName, serverEntity);
-                				serverMap.put(deploymentName, applicationEntity);
+        						applicationMap.put(deploymentName, applicationEntity);
         					}
         				}
         				logger.info("");
@@ -142,6 +143,7 @@ public class JBossRemoteReader implements MetadataReader {
 		result.add(new HashSet<Entity>(applicationMap.values()));
 		result.add(new HashSet<Entity>(componentMap.values()));
 		
+		YamlWriter.writeToYaml(result);
 		return result;
 	}
 	
@@ -164,7 +166,7 @@ public class JBossRemoteReader implements MetadataReader {
     	description.append("JVM Details: ").append(System.getProperty("line.separator")).append(jvmDetails);
     	String[] keywords = {"JBoss server","AIX", "InHouse"};
     	
-    	Entity entity = new UnicomerEntity("Environment", serverName, serverName + " - JBoss", description.toString(), productVersion,  ArtifactAlgorithm.DEFAULT);
+    	Entity entity = new UnicomerEntity("Environment : Application Server", serverName, serverName + " - JBoss", description.toString(), productVersion,  ArtifactAlgorithm.DEFAULT);
     	entity.addCategorization("LineOfBusiness", "InHouse : InHouse Infrastructure");
     	entity.addCategorization("AssetLifecycleStage", "Stage 4 - Release");
     	entity.addCustomData("client-platrorms", "LINUX");

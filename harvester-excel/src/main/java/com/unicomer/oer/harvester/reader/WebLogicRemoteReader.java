@@ -30,6 +30,7 @@ import com.oracle.oer.sync.framework.MetadataManager;
 import com.oracle.oer.sync.framework.MetadataReader;
 import com.oracle.oer.sync.model.Entity;
 import com.unicomer.oer.harvester.model.UnicomerEntity;
+import com.unicomer.oer.harvester.writer.YamlWriter;
 
 /**
  * @author carlosj_rodriguez
@@ -102,7 +103,7 @@ public class WebLogicRemoteReader implements MetadataReader {
 			for (ObjectName serverRuntime:serverRuntimes) {
 				String serverName = (String) mbconn.getAttribute(serverRuntime, "Name");
 				logger.info("> " + serverName);
-				serverEntity = new UnicomerEntity("Environment", serverName, serverName, serverName, "1.0.0", ArtifactAlgorithm.DEFAULT);
+				serverEntity = new UnicomerEntity("Environment : Application Server", serverName, serverName, serverName, "1.0.0", ArtifactAlgorithm.DEFAULT);
 				serverMap.put(serverName, serverEntity);
 				
 //				logger.info("  Aplicaciones desplegadas:");
@@ -197,6 +198,7 @@ public class WebLogicRemoteReader implements MetadataReader {
 		list.add(new HashSet<Entity>(applicationMap.values()));
 		list.add(new HashSet<Entity>(libraryMap.values()));
 		
+		YamlWriter.writeToYaml(list);
 		return list;
 	}
 	

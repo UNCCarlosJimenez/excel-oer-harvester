@@ -27,6 +27,7 @@ public class UnicomerEntity extends EntityBase implements Entity {
 	}
 	
 	/**
+	 * Define la interfaz Entity para la implementacion de Unicomer
 	 * 
 	 * @param assetType: Tipo de activo
 	 * @param id: ID del activo en el proceso

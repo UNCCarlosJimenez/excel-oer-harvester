@@ -21,7 +21,9 @@ import org.apache.xmlbeans.XmlCursor;
 import com.flashline.crypto.EncodeDecode;
 import com.flashline.registry.openapi.base.OpenAPIException;
 import com.flashline.registry.openapi.entity.Asset;
+import com.flashline.registry.openapi.entity.AuthToken;
 import com.flashline.registry.openapi.entity.NameValue;
+import com.flashline.registry.openapi.service.v300.FlashlineRegistryTr;
 import com.flashline.util.StringUtils;
 import com.oracle.artifact.ArtifactAlgorithm;
 import com.oracle.oer.sync.framework.MetadataEntityWriter;
@@ -524,4 +526,50 @@ public class UnicomerOERWriter extends OERWriter {
 		this.logger.error(errMsg);
 		throw new MetadataIntrospectionException(errMsg);
 	}
+	
+	
+	public void mapAssetToEntity(Asset asset, Entity entity) {
+		this.entityAssetMap.put(entity.getId(), asset);
+		this.logger.debug("Mapped Asset Id: [" + asset.getID() + "] with Entity : [" + entity.getName() + "] ID: [" + entity.getId() + "].");
+	}
+	
+	public AuthToken getAuthToken() throws Exception {
+		FlashlineRegistryTr oer = ALERConnectionCache.getInstance().getFlashlineRegistry(this.uri);
+		return ALERConnectionCache.getInstance().getAuthToken(this.uri, this.user, this.pass, oer);
+	}
+	
+	public Asset getMappedAsset(Entity entity) {
+		this.logger.debug("Finding asset for Entity : [" + entity.getNamespace() + "::" + entity.getName() + "] ID: [" + entity.getId() + "] in the map.");
+
+		Asset asset = (Asset) this.entityAssetMap.get(entity.getId());
+		if (asset != null) {
+			this.logger.debug("Returning asset from entity-asset map. AssetId: [" + asset.getID() + "] for Entity : ["
+					+ entity.getNamespace() + "::" + entity.getName() + "] ID: [" + entity.getId() + "].");
+		} else {
+			this.logger.debug("No asset exists in entity-asset map for Entity : [" + entity.getNamespace() + "::"
+					+ entity.getName() + "] ID: [" + entity.getId() + "].");
+		}
+		
+		return asset;
+	}
+	
+	public void shutdown() {
+		this.logger.info("Starting OER Shutdown and Clean up...");
+		try {
+			if ((!this.committed) && (!this.shutdown)) {
+				System.out.println("Rolling Back");
+				if (bEnableTransaction)
+					try {
+						this.facadeTr.rollback();
+					} catch (OpenAPIException e) {
+						if (e.getServerErrorCode() == 16003)
+							this.logger.warn("Cannot rollback as the transaction has timed out.");
+					}
+			}
+		} finally {
+			this.shutdown = true;
+			ALERConnectionCache.getInstance().clear();
+		}
+	}
+	
 }

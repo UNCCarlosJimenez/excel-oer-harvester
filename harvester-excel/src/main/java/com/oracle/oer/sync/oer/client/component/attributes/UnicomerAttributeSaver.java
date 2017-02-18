@@ -51,6 +51,7 @@ public class UnicomerAttributeSaver implements AttributeSaver {
 	 * @see com.oracle.oer.sync.oer.client.component.attributes.AttributeSaver#
 	 * readAttributes(long)
 	 */
+	@SuppressWarnings("unchecked")
 	public List<Attribute> readAttributes(long assetID) throws MetadataIntrospectionException {
 		List<Attribute> results = new ArrayList<Attribute>();
 		Map<MetadataEntrySummary, String> entries = this.writer.assetMetadataRead(assetID);
