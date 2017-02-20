@@ -3,7 +3,6 @@ package com.unicomer.oer.harvester.writer;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +18,7 @@ public class YamlWriter {
 		
 	}
 	
-	public static void writeToYaml(List<Set<Entity>> harvestedEntities){
+	public static void writeToYaml(Set<Entity> harvestedEntities) throws Exception{
 		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 		int count = 0;
 		try {
@@ -27,15 +26,17 @@ public class YamlWriter {
         			+ new SimpleDateFormat("yyyyMMddhhmmss").format(new Date())
         			+ ".yml";
         	
-        	for(Set<Entity> setEntities : harvestedEntities){
-        		for(Entity entity : setEntities){
-        			mapper.writeValue(new FileWriter(fileLocation, true), entity);
-        			count++;
-            	}
-        	}
+			for (Entity entity : harvestedEntities) {
+				mapper.writeValue(new FileWriter(fileLocation, true), entity);
+				count++;
+			}
+        	
         	logger.info(count + " entities written in " + fileLocation + " file");
         } catch (Exception e) {
             logger.warn("Error when writing Harvested Assets in YAML file... " + e.getMessage());
+        }finally{
+        	// Sleeps for 1 second to be sure that the filename will not be repeated at all
+        	Thread.sleep(1000);
         }
 	}
 	

@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.flashline.util.StringUtils;
 import com.oracle.bpelModel.WsdlSummaryDocument;
 import com.oracle.oer.sync.framework.MetadataIntrospectionException;
@@ -18,14 +19,13 @@ import com.oracle.oer.sync.framework.MetadataManager;
 import com.oracle.oer.sync.model.ArtifactEntity;
 import com.oracle.oer.sync.model.Entity;
 import com.oracle.oer.sync.model.ManifestEntry;
-import com.unicomer.oer.harvester.model.URelationship;
-import com.unicomer.oer.harvester.model.UAttribute;
 import com.oracle.oer.sync.oer.client.component.name.AssetNamerImpl;
 
 /**
  * @author carlosj_rodriguez
  *
  */
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class UnicomerEntityYaml {
 	private MetadataLogger logger = MetadataManager.getLogger(UnicomerEntityYaml.class);
 	protected AssetNamerImpl namer = new AssetNamerImpl();
@@ -138,7 +138,11 @@ public class UnicomerEntityYaml {
 	public List<UAttribute> getHarvesterProperties() {
 		return this.harvesterProperties;
 	}
-
+	
+	public void setHarvesterProperties(List<UAttribute> harvesterProperties) {
+		this.harvesterProperties = harvesterProperties;
+	}
+	
 	public void addHarvesterPropery(UAttribute a) {
 		addHarvesterProperty(a, false);
 	}
@@ -225,8 +229,12 @@ public class UnicomerEntityYaml {
 	public List<URelationship> getRelationships() {
 		return this.relationships;
 	}
-
-	public void addRelationship(URelationship r) {
+	
+	public void setRelationships(List<URelationship> r) {
+		this.relationships=r;
+	}
+	
+	public void addRelationships(URelationship r) {
 		this.relationships.add(r);
 	}
 
@@ -295,12 +303,12 @@ public class UnicomerEntityYaml {
 		return string.replaceAll("[ -]", "");
 	}
 
-	public void addRelationship(Entity childEntity, String relType, boolean isThisSource) {
-		URelationship rel = new URelationship(childEntity, relType, isThisSource);
-		addRelationship(rel);
-
-		this.logger.debug("Added relationship from : [" + getName() + "] to: [" + childEntity.getName() + " ] ");
-	}
+//	public void addRelationship(Entity childEntity, String relType, boolean isThisSource) {
+//		URelationship rel = new URelationship(childEntity, relType, isThisSource);
+//		addRelationships(rel);
+//
+//		this.logger.debug("Added relationship from : [" + getName() + "] to: [" + childEntity.getName() + " ] ");
+//	}
 
 	public void addManifestEntry(ArtifactEntity childEntity, String parentURI, URI childURI, String relativeURI)
 			throws Exception {
@@ -317,8 +325,8 @@ public class UnicomerEntityYaml {
 		addManifestEntry(entry);
 	}
 	
-	public List<Entity> getRelatedEntities(String relType) {
-		List<Entity> results = new ArrayList<Entity>();
+	public List<UnicomerEntityYaml> getRelatedEntities(String relType) {
+		List<UnicomerEntityYaml> results = new ArrayList<UnicomerEntityYaml>();
 		for (URelationship rel : getRelationships()) {
 			if ((relType.equals(rel.getName())) && (rel.getRelatedTo() != null)) {
 				results.add(rel.getRelatedTo());
@@ -328,7 +336,7 @@ public class UnicomerEntityYaml {
 	}
 
 	public Entity getRelatedEntity(String relType) throws MetadataIntrospectionException {
-		List<Entity> results = getRelatedEntities(relType);
+		List<UnicomerEntityYaml> results = getRelatedEntities(relType);
 		if (results.isEmpty()) {
 			return null;
 		}
@@ -339,11 +347,11 @@ public class UnicomerEntityYaml {
 		return (Entity) results.get(0);
 	}
 
-	public List<Entity> getChildEntities(String childAssetType) {
-		List<Entity> results = new ArrayList<Entity>();
+	public List<UnicomerEntityYaml> getChildEntities(String childAssetType) {
+		List<UnicomerEntityYaml> results = new ArrayList<UnicomerEntityYaml>();
 		List<URelationship> rels = getRelationships();
 		for (URelationship rel : rels) {
-			Entity child = rel.getRelatedTo();
+			UnicomerEntityYaml child = rel.getRelatedTo();
 			if (child.getAssetType().equals(childAssetType)) {
 				results.add(child);
 			}
@@ -351,8 +359,8 @@ public class UnicomerEntityYaml {
 		return results;
 	}
 
-	public Entity getChildEntity(String childAssetType) throws MetadataIntrospectionException {
-		List<Entity> results = getChildEntities(childAssetType);
+	public UnicomerEntityYaml getChildEntity(String childAssetType) throws MetadataIntrospectionException {
+		List<UnicomerEntityYaml> results = getChildEntities(childAssetType);
 		if (results.isEmpty()) {
 			return null;
 		}
@@ -360,7 +368,7 @@ public class UnicomerEntityYaml {
 			throw new MetadataIntrospectionException(
 					"Found more than one related entity from " + getName() + " with type " + results);
 		}
-		return (Entity) results.get(0);
+		return (UnicomerEntityYaml) results.get(0);
 	}
 
 	public void removeRelatedEntity(Entity child) {

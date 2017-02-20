@@ -198,7 +198,11 @@ public class WebLogicRemoteReader implements MetadataReader {
 		list.add(new HashSet<Entity>(applicationMap.values()));
 		list.add(new HashSet<Entity>(libraryMap.values()));
 		
-		YamlWriter.writeToYaml(list);
+		for(Set<Entity> entitySet : list){
+			if(entitySet != null && entitySet.size() > 0){
+				YamlWriter.writeToYaml(entitySet);
+			}
+		}
 		return list;
 	}
 	

@@ -115,6 +115,7 @@ public class TestJBoss {
 		return "[Name=" + name + ", Module=" + module + ", Version=" + version + ", Extension=" + extension + "]";
 	}
 	
+	@SuppressWarnings("unused")
 	private static void init2() throws Exception {
 		String host = "oraposdms.unicomer.com";
 		int port = 9999;

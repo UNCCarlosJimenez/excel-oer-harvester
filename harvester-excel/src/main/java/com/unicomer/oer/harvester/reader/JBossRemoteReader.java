@@ -143,7 +143,12 @@ public class JBossRemoteReader implements MetadataReader {
 		result.add(new HashSet<Entity>(applicationMap.values()));
 		result.add(new HashSet<Entity>(componentMap.values()));
 		
-		YamlWriter.writeToYaml(result);
+		for(Set<Entity> entitySet : result){
+			if(entitySet != null && entitySet.size() > 0){
+				YamlWriter.writeToYaml(entitySet);
+			}
+		}
+		
 		return result;
 	}
 	
