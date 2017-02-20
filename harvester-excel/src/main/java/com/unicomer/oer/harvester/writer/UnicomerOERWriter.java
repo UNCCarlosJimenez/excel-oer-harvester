@@ -22,6 +22,8 @@ import com.flashline.crypto.EncodeDecode;
 import com.flashline.registry.openapi.base.OpenAPIException;
 import com.flashline.registry.openapi.entity.Asset;
 import com.flashline.registry.openapi.entity.AuthToken;
+import com.flashline.registry.openapi.entity.Categorization;
+import com.flashline.registry.openapi.entity.CategorizationType;
 import com.flashline.registry.openapi.entity.NameValue;
 import com.flashline.registry.openapi.service.v300.FlashlineRegistryTr;
 import com.flashline.util.StringUtils;
@@ -186,8 +188,8 @@ public class UnicomerOERWriter extends OERWriter {
 			int lCount = 0;
 
 			while (lIt.hasNext()) {
-				String lAssetID = (String) lIt.next();
-				Asset lAsset = (Asset) this.entityAssetMap.get(lAssetID);
+				String lAssetID = lIt.next();
+				Asset lAsset = this.entityAssetMap.get(lAssetID);
 
 				this.logger
 						.info("Asset of type " + lAsset.getTypeName() + " to be created: " + lAsset.getDisplayName());
@@ -541,7 +543,7 @@ public class UnicomerOERWriter extends OERWriter {
 	public Asset getMappedAsset(Entity entity) {
 		this.logger.debug("Finding asset for Entity : [" + entity.getNamespace() + "::" + entity.getName() + "] ID: [" + entity.getId() + "] in the map.");
 
-		Asset asset = (Asset) this.entityAssetMap.get(entity.getId());
+		Asset asset = this.entityAssetMap.get(entity.getId());
 		if (asset != null) {
 			this.logger.debug("Returning asset from entity-asset map. AssetId: [" + asset.getID() + "] for Entity : ["
 					+ entity.getNamespace() + "::" + entity.getName() + "] ID: [" + entity.getId() + "].");

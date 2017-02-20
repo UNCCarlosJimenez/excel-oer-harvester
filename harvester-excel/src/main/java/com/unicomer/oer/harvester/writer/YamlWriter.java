@@ -20,18 +20,13 @@ public class YamlWriter {
 	
 	public static void writeToYaml(Set<Entity> harvestedEntities) throws Exception{
 		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-		int count = 0;
 		try {
         	String fileLocation = "HarvestedAssets-"
         			+ new SimpleDateFormat("yyyyMMddhhmmss").format(new Date())
         			+ ".yml";
         	
-			for (Entity entity : harvestedEntities) {
-				mapper.writeValue(new FileWriter(fileLocation, true), entity);
-				count++;
-			}
-        	
-        	logger.info(count + " entities written in " + fileLocation + " file");
+        	mapper.writeValue(new FileWriter(fileLocation, true), harvestedEntities);        	
+        	logger.info(harvestedEntities.size() + " entities written in " + fileLocation + " file");
         } catch (Exception e) {
             logger.warn("Error when writing Harvested Assets in YAML file... " + e.getMessage());
         }finally{

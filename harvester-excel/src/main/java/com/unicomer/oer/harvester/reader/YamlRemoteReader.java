@@ -109,7 +109,7 @@ public class YamlRemoteReader implements MetadataReader {
 				result.addCategorization(attibute.getName(), attibute.getValue());
 			}
 			
-			fileEntity.getCustomData().forEach(result :: addCategorization);
+			fileEntity.getCustomData().forEach(result :: addCustomData);
 			
 			for(UAttribute attibute : fileEntity.getHarvesterProperties()){
 				result.addHarvesterProperty(attibute.getName(), attibute.getValue());

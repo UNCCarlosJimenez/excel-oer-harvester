@@ -17,7 +17,7 @@ public class UnicomerEntity extends EntityBase implements Entity {
 	public ArtifactAlgorithm getArtifactAlgorithm() {
 		return artifactAlgorithm;
 	}
-
+	
 	public void setArtifactAlgorithm(ArtifactAlgorithm artifactAlgorithm) {
 		this.artifactAlgorithm = artifactAlgorithm;
 	}
