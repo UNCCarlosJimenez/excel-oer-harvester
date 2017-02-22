@@ -13,6 +13,7 @@ import com.oracle.oer.sync.framework.MetadataLogger;
 import com.oracle.oer.sync.framework.MetadataManager;
 import com.oracle.oer.sync.framework.MetadataReader;
 import com.oracle.oer.sync.model.Entity;
+import com.unicomer.oer.harvester.util.PropertiesLoader;
 
 /**
  * @author carlosj_rodriguez
@@ -21,6 +22,13 @@ import com.oracle.oer.sync.model.Entity;
 public class UnicomerRemoteReader implements MetadataReader {
 	private static MetadataLogger logger = MetadataManager.getLogger(UnicomerRemoteReader.class);
 	private MetadataIntrospectionConfig config = null;
+	
+	PropertiesLoader prop = PropertiesLoader.getInstance();
+	private String jBossHarvestType = prop.getProperty("jboss.harvest-type");
+	private String soaSuiteHarvestType = prop.getProperty("soasuite.harvest-type");
+	private String weblogicHarvestType = prop.getProperty("weblogic.harvest-type");
+	private String fileHarvestType = prop.getProperty("file.harvest-type");
+	private String websphereHarvestType = prop.getProperty("websphere.harvest-type");
 	private String harvestType = "";
 	
 	public UnicomerRemoteReader(){
@@ -38,15 +46,15 @@ public class UnicomerRemoteReader implements MetadataReader {
 	
 	public List<Set<Entity>> read() throws Exception {
 		MetadataReader actualReader = null;
-		if(harvestType.equals("File")){
+		if(harvestType.equals(fileHarvestType)){
 			actualReader = new YamlRemoteReader();
-		}else if(harvestType.equals("JBoss")){
+		}else if(harvestType.equals(jBossHarvestType)){
 			actualReader = new JBossRemoteReader();
-		}else if(harvestType.equals("SOASuite")){
+		}else if(harvestType.equals(soaSuiteHarvestType)){
 			actualReader = new SoaSuiteRemoteReader();
-		}else if(harvestType.equals("WLS")){
+		}else if(harvestType.equals(weblogicHarvestType)){
 			actualReader = new WebLogicRemoteReader();
-		}else if(harvestType.equals("WebSphere")){
+		}else if(harvestType.equals(websphereHarvestType)){
 			actualReader = new WebSphereRemoteReader();
 		}else {
 			logger.error("An implementation class for " + harvestType + " server type is not available...");

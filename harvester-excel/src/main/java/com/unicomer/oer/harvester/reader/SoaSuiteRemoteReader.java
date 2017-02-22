@@ -31,6 +31,7 @@ import com.oracle.oer.sync.framework.MetadataManager;
 import com.oracle.oer.sync.framework.MetadataReader;
 import com.oracle.oer.sync.model.Entity;
 import com.unicomer.oer.harvester.model.UnicomerEntity;
+import com.unicomer.oer.harvester.util.PropertiesLoader;
 import com.unicomer.oer.harvester.writer.YamlWriter;
 
 /**
@@ -45,6 +46,16 @@ public class SoaSuiteRemoteReader implements MetadataReader {
 	private String password = "";
 	private static JMXConnector jmxConn = null;
 	
+	PropertiesLoader prop = PropertiesLoader.getInstance();
+	private String jndiPath = prop.getProperty("soasuite.jndi-path");
+	private String rootMbean = prop.getProperty("soasuite.root-mbean"); 
+	private String compositesMBean = prop.getProperty("soasuite.composites-mbean"); 
+	private String restBinding = prop.getProperty("soasuite.binding-type.rest");
+	private String endpointAttribute = prop.getProperty("soasuite.custom-data.endpoint");
+	private String deploymentAssetType = prop.getProperty("soasuite.deployment.asset-type");
+	private String serverAssetType = prop.getProperty("soasuite.server.asset-type"); 
+	private String defVersion = prop.getProperty("default.version");
+	private String defAppToServerRelation = prop.getProperty("default.app-to-server-relation");
 	
 	@SuppressWarnings("resource")
 	public static void main(String[] args) throws Exception {
@@ -85,24 +96,22 @@ public class SoaSuiteRemoteReader implements MetadataReader {
 		HashMap<String, Entity> compositeMap = new HashMap<String, Entity>();
 		try {
 			UnicomerEntity compositeEntity = null;
-			jmxConn = initConnection(urlString, username, password, "/jndi/weblogic.management.mbeanservers.runtime");
+			jmxConn = initConnection(urlString, username, password, jndiPath);
 			MBeanServerConnection mbconn2 = jmxConn.getMBeanServerConnection();
-
-			ObjectName serverQuery = new ObjectName(
-					"com.bea:Name=RuntimeService,Type=weblogic.management.mbeanservers.runtime.RuntimeServiceMBean");
+			
+			ObjectName serverQuery = new ObjectName(rootMbean);
 			String serverName = (String) mbconn2.getAttribute(serverQuery, "ServerName");
-			Entity serverEntity = new UnicomerEntity("Environment : Application Server", serverName, serverName,
-					serverName, "1.0.0", ArtifactAlgorithm.DEFAULT);
+			Entity serverEntity = new UnicomerEntity(serverAssetType, serverName, serverName, serverName, defVersion,
+					ArtifactAlgorithm.DEFAULT);
 			serverMap.put(serverName, serverEntity);
 
 			Set<ObjectName> compositeNames = new LinkedHashSet<ObjectName>();
-			compositeNames
-					.addAll(mbconn2.queryNames(new ObjectName("oracle.soa.config:j2eeType=SCAComposite,*"), null));
+			compositeNames.addAll(mbconn2.queryNames(new ObjectName(compositesMBean), null));
 
 			if (compositeNames.isEmpty()) {
 				throw new MetadataIntrospectionException("Found no Composites on the remote server");
 			}
-
+			
 			for (ObjectName composite : compositeNames) {
 				String name = (String) mbconn2.getAttribute(composite, "Name");
 				String revision = (String) mbconn2.getAttribute(composite, "Revision");
@@ -119,13 +128,13 @@ public class SoaSuiteRemoteReader implements MetadataReader {
 						compositeMap.remove(name);
 					} else {
 						// Se crea la referencia
-						compositeEntity = new UnicomerEntity("Application", name, name, name, revision,
+						compositeEntity = new UnicomerEntity(deploymentAssetType, name, name, name, revision,
 								ArtifactAlgorithm.DEFAULT);
 						compositeEntity.addCategorization("AssetFunction", "Creacion manual");
 					}
-					compositeEntity.addRelationship(serverEntity, "Deployment", false);
+					compositeEntity.addRelationship(serverEntity, defAppToServerRelation, false);
 					compositeEntity.addCustomData("partition", partition);
-
+					
 					try {
 						ObjectName[] services = (ObjectName[]) mbconn2.getAttribute(composite, "Services");
 						for (ObjectName service : services) {
@@ -134,7 +143,7 @@ public class SoaSuiteRemoteReader implements MetadataReader {
 							String endpoint = "";
 							for (ObjectName binding : bindings) {
 								String bindingType = (String) mbconn2.getAttribute(binding, "BindingType");
-								if (bindingType.equals("binding.rest")) {
+								if (bindingType.equals(restBinding)) {
 									endpoint = (String) mbconn2.getAttribute(binding, "Location");
 								} else {
 									endpoint = (String) mbconn2.getAttribute(binding, "EndpointAddressURI");
@@ -142,7 +151,7 @@ public class SoaSuiteRemoteReader implements MetadataReader {
 								}
 							}
 							if (endpoint != null && !endpoint.isEmpty())
-								compositeEntity.addCustomData("endpoint", endpoint);
+								compositeEntity.addCustomData(endpointAttribute, endpoint);
 						}
 					} catch (Exception e) {
 						logger.fatal(e.getMessage());

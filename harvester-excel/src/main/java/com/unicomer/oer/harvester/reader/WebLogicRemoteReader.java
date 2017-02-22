@@ -30,6 +30,7 @@ import com.oracle.oer.sync.framework.MetadataManager;
 import com.oracle.oer.sync.framework.MetadataReader;
 import com.oracle.oer.sync.model.Entity;
 import com.unicomer.oer.harvester.model.UnicomerEntity;
+import com.unicomer.oer.harvester.util.PropertiesLoader;
 import com.unicomer.oer.harvester.writer.YamlWriter;
 
 /**
@@ -42,6 +43,16 @@ public class WebLogicRemoteReader implements MetadataReader {
 	private String urlString = "";//"http://uinhsap1wldev.datacenter.milady.local:7091/";
 	private String username = "";//"weblogic";
 	private String password = "";//"Un1c0m3r";
+	
+	PropertiesLoader prop = PropertiesLoader.getInstance();
+	private String jndiPath = prop.getProperty("weblogic.jndi-path");
+	private String rootMBean =  prop.getProperty("weblogic.root-mbean");
+//	private String datasourceAssetType = prop.getProperty("weblogic.datasource.asset-type");	
+	private String deploymentAssetType = prop.getProperty("weblogic.deployment.asset-type");
+	private String librarytAssetType = prop.getProperty("weblogic.library.asset-type");
+	private String serverAssetType = prop.getProperty("weblogic.server.asset-type"); 
+	private String defVersion = prop.getProperty("default.version");
+	private String defAppToServerRelation = prop.getProperty("default.app-to-server-relation");
 	
 	@SuppressWarnings("resource")
 	public static void main(String[] args) throws Exception {
@@ -84,7 +95,6 @@ public class WebLogicRemoteReader implements MetadataReader {
 		
 		try{
 			final ObjectName service;
-			String jndiPath = "/jndi/weblogic.management.mbeanservers.domainruntime";// "/jndi/weblogic.management.mbeanservers.runtime";
 			UnicomerEntity serverEntity = null;
 			UnicomerEntity applicationEntity = null;
 			UnicomerEntity libraryEntity = null;
@@ -92,9 +102,7 @@ public class WebLogicRemoteReader implements MetadataReader {
 			JMXConnector jmxConn = initConnection(urlString, username, password, jndiPath);
 			MBeanServerConnection mbconn = jmxConn.getMBeanServerConnection();
 			
-			service = new ObjectName(
-					// "com.bea:Name=DomainRuntimeService,Type=*");
-					"com.bea:Name=DomainRuntimeService,Type=weblogic.management.mbeanservers.domainruntime.DomainRuntimeServiceMBean");
+			service = new ObjectName(rootMBean);
 			
 			ObjectName[] serverRuntimes = (ObjectName[]) mbconn.getAttribute(service, "ServerRuntimes");
 			logger.info("Se obtiene " + serverRuntimes.length
@@ -103,7 +111,7 @@ public class WebLogicRemoteReader implements MetadataReader {
 			for (ObjectName serverRuntime:serverRuntimes) {
 				String serverName = (String) mbconn.getAttribute(serverRuntime, "Name");
 				logger.info("> " + serverName);
-				serverEntity = new UnicomerEntity("Environment : Application Server", serverName, serverName, serverName, "1.0.0", ArtifactAlgorithm.DEFAULT);
+				serverEntity = new UnicomerEntity(serverAssetType, serverName, serverName, serverName, defVersion, ArtifactAlgorithm.DEFAULT);
 				serverMap.put(serverName, serverEntity);
 				
 //				logger.info("  Aplicaciones desplegadas:");
@@ -116,10 +124,10 @@ public class WebLogicRemoteReader implements MetadataReader {
 						applicationMap.remove(applicationName);
 					}else{
 						// Se crea la referencia
-						applicationEntity = new UnicomerEntity("Application", applicationName, applicationName, applicationName, "1.0.0", ArtifactAlgorithm.DEFAULT);
+						applicationEntity = new UnicomerEntity(deploymentAssetType, applicationName, applicationName, applicationName, defVersion, ArtifactAlgorithm.DEFAULT);
 						applicationEntity.addCategorization("AssetFunction", "Creacion manual");
 					}
-					applicationEntity.addRelationship(serverEntity, "Deployment", false);
+					applicationEntity.addRelationship(serverEntity, defAppToServerRelation, false);
 					applicationMap.put(applicationName, applicationEntity);
 					logger.info("    " + applicationName);
 					
@@ -159,10 +167,10 @@ public class WebLogicRemoteReader implements MetadataReader {
 						libraryMap.remove(libraryName);
 					}else{
 						// Se crea la referencia
-						libraryEntity = new UnicomerEntity("Application", libraryName, libraryName, libraryName, libraryVersion, ArtifactAlgorithm.DEFAULT);
+						libraryEntity = new UnicomerEntity(librarytAssetType, libraryName, libraryName, libraryName, libraryVersion, ArtifactAlgorithm.DEFAULT);
 						libraryEntity.addCategorization("AssetFunction", "Creacion manual");
 					}
-					libraryEntity.addRelationship(serverEntity, "Deployment", false);
+					libraryEntity.addRelationship(serverEntity, defAppToServerRelation, false);
 					libraryMap.put(libraryName, libraryEntity);
 					logger.info("    " + libraryName);
 					

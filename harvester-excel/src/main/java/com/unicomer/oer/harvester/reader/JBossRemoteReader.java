@@ -34,6 +34,7 @@ import com.oracle.oer.sync.framework.MetadataManager;
 import com.oracle.oer.sync.framework.MetadataReader;
 import com.oracle.oer.sync.model.Entity;
 import com.unicomer.oer.harvester.model.UnicomerEntity;
+import com.unicomer.oer.harvester.util.PropertiesLoader;
 import com.unicomer.oer.harvester.writer.YamlWriter;
 
 /**
@@ -47,6 +48,18 @@ public class JBossRemoteReader implements MetadataReader {
 	private String username = "";//"weblogic";
 	private String password = "";//"Un1c0m3r";
 	private int port = 0;
+	
+	PropertiesLoader prop = PropertiesLoader.getInstance();
+	private String rootMbean = prop.getProperty("jboss.management-realm");
+//	private String[] datasourceAttributes = prop.getProperty("jboss.datasource-attributes").split(",");
+//	private String[] datasourceTypes = prop.getProperty("jboss.types").split(",");
+//	private String datasourceAttributeNoValue =  prop.getProperty("jboss.atribute.no-value");
+//	private String profile = prop.getProperty("jboss.profile");
+//	private String datasourceAssetType = prop.getProperty("jboss.datasource.asset-type");	
+	private String deploymentAssetType = prop.getProperty("jboss.deployment.asset-type");
+	private String serverAssetType = prop.getProperty("jboss.server-group.asset-type"); 
+	private String defVersion = prop.getProperty("default.version");
+	private String defAppToServerRelation = prop.getProperty("default.app-to-server-relation");
 	
 	public JBossRemoteReader(){
 		try{
@@ -75,7 +88,7 @@ public class JBossRemoteReader implements MetadataReader {
 		HashMap<String, Entity> componentMap = new HashMap<String, Entity>();
 		
 		try{
-			ModelControllerClient client = createClient(InetAddress.getByName(hostname), port, username, password, "ManagementRealm");
+			ModelControllerClient client = createClient(InetAddress.getByName(hostname), port, username, password, rootMbean);
 			logger.info("Conexion establecida!");
 			
             //Se obtienen generalidades del ambiente
@@ -98,7 +111,6 @@ public class JBossRemoteReader implements MetadataReader {
                 ModelNode serverGroupResult = client.execute(op);
                 
                 if(Operations.isSuccessfulOutcome(serverGroupResult)){
-                	// Operations.readResult(result).require("summary")
         			ModelNode serverGroups = serverGroupResult.get("result");
         			Iterator<ModelNode> it =  serverGroups.asList().iterator();
         			while(it.hasNext()){
@@ -171,7 +183,7 @@ public class JBossRemoteReader implements MetadataReader {
     	description.append("JVM Details: ").append(System.getProperty("line.separator")).append(jvmDetails);
     	String[] keywords = {"JBoss server","AIX", "InHouse"};
     	
-    	Entity entity = new UnicomerEntity("Environment : Application Server", serverName, serverName + " - JBoss", description.toString(), productVersion,  ArtifactAlgorithm.DEFAULT);
+    	Entity entity = new UnicomerEntity(serverAssetType, serverName, serverName + " - JBoss", description.toString(), productVersion,  ArtifactAlgorithm.DEFAULT);
     	entity.addCategorization("LineOfBusiness", "InHouse : InHouse Infrastructure");
     	entity.addCategorization("AssetLifecycleStage", "Stage 4 - Release");
     	entity.addCustomData("client-platrorms", "LINUX");
@@ -200,7 +212,7 @@ public class JBossRemoteReader implements MetadataReader {
 		}
 		
 		try{
-			version = "1.0.0";
+			version = defVersion;
 			String fileName = deploymentName;
 			// Remover la extension, si existe
 			int extensionIndex = fileName.lastIndexOf('.');
@@ -221,7 +233,7 @@ public class JBossRemoteReader implements MetadataReader {
 		}catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Exception occured while parsing version from deployment " + deploymentName + ". " + e.getMessage());
-			version = "1.0.0";
+			version = defVersion;
 		}
 		
 		try{
@@ -254,9 +266,9 @@ public class JBossRemoteReader implements MetadataReader {
 		
 		String[] keywords = {"Test Environment", "InHouse", "Unicomer Harvester"};
 		
-		Entity entity = new UnicomerEntity("Application", name, name, "", version,  ArtifactAlgorithm.DEFAULT);
+		Entity entity = new UnicomerEntity(deploymentAssetType, name, name, "", version,  ArtifactAlgorithm.DEFAULT);
 		entity.setDescription("Aplicacion de " + module + " cargada con Harvester, de tipo " +  extension);
-		entity.addRelationship(server, "Deployment", false);
+		entity.addRelationship(server, defAppToServerRelation, false);
 		entity.addCategorization("LineOfBusiness", "InHouse : InHouse Software");
     	entity.addCategorization("AssetLifecycleStage", "Stage 4 - Release");
     	entity.addCategorization("Technology", "Java EE");

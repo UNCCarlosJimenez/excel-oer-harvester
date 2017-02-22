@@ -10,9 +10,12 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.oracle.oer.sync.framework.MetadataLogger;
 import com.oracle.oer.sync.framework.MetadataManager;
 import com.oracle.oer.sync.model.Entity;
+import com.unicomer.oer.harvester.util.PropertiesLoader;
 
 public class YamlWriter {
 	private static MetadataLogger logger = MetadataManager.getLogger(YamlWriter.class);
+	private static PropertiesLoader prop = PropertiesLoader.getInstance();
+	private static String fileLocation = prop.getProperty("file.harvest-summary.location");
 	
 	public YamlWriter(){
 		
@@ -21,7 +24,7 @@ public class YamlWriter {
 	public static void writeToYaml(Set<Entity> harvestedEntities) throws Exception{
 		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 		try {
-        	String fileLocation = "HarvestedAssets-"
+        	fileLocation = fileLocation + "HarvestedAssets-"
         			+ new SimpleDateFormat("yyyyMMddhhmmss").format(new Date())
         			+ ".yml";
         	
