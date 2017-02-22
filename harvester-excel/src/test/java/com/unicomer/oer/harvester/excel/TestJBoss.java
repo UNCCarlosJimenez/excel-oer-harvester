@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -24,10 +25,26 @@ import com.oracle.oer.sync.framework.MetadataManager;
 
 public class TestJBoss {
 	private static MetadataLogger logger = MetadataManager.getLogger(TestJBoss.class);
+	private static String[] attributes = {
+			"blocking-timeout-wait-millis",
+			"driver-name",
+			"enabled",
+			"idle-timeout-minutes",
+			"jndi-name",
+			"max-pool-size",
+			"min-pool-size",
+			"set-tx-query-timeout",
+			"query-timeout",
+			"user-name",
+			"password"
+			};
 	
+	private static String[] types = {"data-source", "xa-data-source"};
+	Properties prop = new Properties();
 	public static void main(String[] args) throws Exception {		
 //		JBossRemoteReader reader = new JBossRemoteReader();
-		init();
+		datasourceInfo();
+		
 		
 //		System.out.println(getVersion("ejb-securityclient-1.4.0-snapshot.jar"));
 //		System.out.println(getVersion("ejb-adminhothclient-1.4.0-snapshot.jar"));
@@ -41,6 +58,73 @@ public class TestJBoss {
 		// }
 		// }
 	}
+	
+	@SuppressWarnings("unused")
+	private static void datasourceInfo() throws Exception{		
+		URI uri = new URI("http://oraposdms.unicomer.com:9999");
+		int port = uri.getPort();
+		String username = "administrator";
+		String password = "admin";
+		ModelControllerClient client = createClient(InetAddress.getByName(uri.getHost()), port, username, password.toCharArray(), "ManagementRealm");
+		logger.info("Conexion establecida!");
+		try {
+			for(String childType : types){
+				ModelNode op = new ModelNode();
+				op.get("operation").set("read-children-names");
+				ModelNode addr = op.get("address");  
+				addr.add("profile", "default");
+				addr.add("subsystem", "datasources");
+				
+				op.get("recursive").set(true);
+	            op.get("proxies").set(true);
+	            op.get("include-runtime").set(true);
+	            op.get("include-defaults").set(true);
+				op.get("child-type").set(childType);
+				
+	            ModelNode datasourcesResult = client.execute(op);
+//	            logger.info("**************Datasources**************");
+//	            logger.info(datasourcesResult.toString());
+	            
+	            if(Operations.isSuccessfulOutcome(datasourcesResult)){
+	            	List<ModelNode> dsNames = Operations.readResult(datasourcesResult).asList();
+	            	ModelNode dsDetailInfo = null;
+	            	for(ModelNode dsNameNode : Operations.readResult(datasourcesResult).asList()){
+	            		String dsName = dsNameNode.asString();
+	            		
+	            		op = new ModelNode();
+	        			op.get("operation").set("read-attribute");
+	        			op.get("address").add("profile", "default");
+	        			op.get("address").add("subsystem", "datasources");
+	        			op.get("address").add(childType, dsName);
+	        			
+	        			op.get("include-runtime").set(true);
+	        			op.get("include-defaults").set(true);
+	        			op.get("recursive").set(true);
+	        			op.get("proxies").set(true);
+	        			logger.info("DataSource: " + dsName);
+	        			
+	        			for(String attribute : attributes){
+	            			op.get("name").set(attribute);
+	                        dsDetailInfo = client.execute(op);
+	                        
+	                        if(Operations.isSuccessfulOutcome(dsDetailInfo)){
+	                        	String attributeValue = Operations.readResult(dsDetailInfo).asString();
+	                        	if(!attributeValue.equals("undefined"))
+	                        		logger.info(attribute + "=" + attributeValue);
+	                        }
+	        			}
+	        			System.out.println(" ");
+	        			System.out.println(" ");
+	            	}
+	            }
+			}
+			
+			client.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	
 	private static String getVersion(String deploymentName){
 		String module = "";
@@ -150,6 +234,7 @@ public class TestJBoss {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static void init() throws Exception {
 		URI uri = new URI("http://oraposdms.unicomer.com:9999");
 		int port = uri.getPort();
