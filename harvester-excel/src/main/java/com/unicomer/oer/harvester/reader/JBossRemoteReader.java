@@ -55,8 +55,8 @@ public class JBossRemoteReader implements MetadataReader {
 //	private String[] datasourceTypes = prop.getProperty("jboss.types").split(",");
 //	private String datasourceAttributeNoValue =  prop.getProperty("jboss.atribute.no-value");
 //	private String profile = prop.getProperty("jboss.profile");
-//	private String datasourceAssetType = prop.getProperty("jboss.datasource.asset-type");	
-	private String deploymentAssetType = prop.getProperty("jboss.deployment.asset-type");
+//	private String datasourceAssetType = prop.getProperty("jboss.datasource.asset-type");
+	private String deploymentAssetType = prop.getProperty("jboss.default.asset-type");
 	private String serverAssetType = prop.getProperty("jboss.server-group.asset-type"); 
 	private String defVersion = prop.getProperty("default.version");
 	private String defAppToServerRelation = prop.getProperty("default.app-to-server-relation");
@@ -157,7 +157,7 @@ public class JBossRemoteReader implements MetadataReader {
 		
 		for(Set<Entity> entitySet : result){
 			if(entitySet != null && entitySet.size() > 0){
-				YamlWriter.writeToYaml(entitySet);
+				YamlWriter.writeToYaml(entitySet, prop.getProperty("jboss.harvest-type"));
 			}
 		}
 		
@@ -176,18 +176,26 @@ public class JBossRemoteReader implements MetadataReader {
     	String releaseVersion = Operations.readResult(productInfo).require("release-version").asString();
     	String productName = Operations.readResult(productInfo).require("product-name").asString();
 		
-    	description.append("Product Name: " + productName).append(System.getProperty("line.separator")).append(System.getProperty("line.separator"));
-    	description.append("Product Version: " + productVersion).append(System.getProperty("line.separator")).append(System.getProperty("line.separator"));
     	description.append("Release Code Name: " + releaseCodeName).append(System.getProperty("line.separator")).append(System.getProperty("line.separator"));
     	description.append("Release Version: " + releaseVersion).append(System.getProperty("line.separator")).append(System.getProperty("line.separator"));
-    	description.append("JVM Details: ").append(System.getProperty("line.separator")).append(jvmDetails);
-    	String[] keywords = {"JBoss server","AIX", "InHouse"};
     	
+    	String[] keywords = {"JBoss server","AIX", "InHouse"};
     	Entity entity = new UnicomerEntity(serverAssetType, serverName, serverName + " - JBoss", description.toString(), productVersion,  ArtifactAlgorithm.DEFAULT);
     	entity.addCategorization("LineOfBusiness", "InHouse : InHouse Infrastructure");
     	entity.addCategorization("AssetLifecycleStage", "Stage 4 - Release");
-    	entity.addCustomData("client-platrorms", "LINUX");
-    	entity.addCustomData("client-platrorms", "UNIX");
+    	entity.addCategorization("ApplicationServer", "JBoss " + productName);
+    	entity.addCategorization("Technology", "Java EE");
+    	entity.addCustomData("product-version", productVersion);
+    	entity.addCustomData("start-details", jvmDetails.toString());
+    	
+    	entity.addCustomData("host-information/host/hostname", hostname);
+    	entity.addCustomData("host-information/host/operative-system", "AIX");
+    	entity.addCustomData("host-information/host/operative-system-version", "7.1");
+    	entity.addCustomData("host-information/host/cpu-info", "12 cores");
+    	entity.addCustomData("host-information/host/memory-info", "10 GB");
+    	entity.addCustomData("host-information/host/ip-address", hostname);
+    	entity.addCustomData("host-information/host/storage-capacity", "235 GB");
+    	
     	entity.addCustomData("constraints", "None");
     	entity.setKeywords(keywords);
     	
@@ -266,6 +274,14 @@ public class JBossRemoteReader implements MetadataReader {
 		
 		String[] keywords = {"Test Environment", "InHouse", "Unicomer Harvester"};
 		
+		if(extension!=""){
+			try{
+				deploymentAssetType = prop.getProperty("jboss" + extension + ".asset-type");
+			}catch(Exception e){
+				logger.error("Error while trying to get jboss" + extension  + ".asset-type property");
+			}
+		}
+		
 		Entity entity = new UnicomerEntity(deploymentAssetType, name, name, "", version,  ArtifactAlgorithm.DEFAULT);
 		entity.setDescription("Aplicacion de " + module + " cargada con Harvester, de tipo " +  extension);
 		entity.addRelationship(server, defAppToServerRelation, false);
@@ -274,9 +290,8 @@ public class JBossRemoteReader implements MetadataReader {
     	entity.addCategorization("Technology", "Java EE");
     	entity.addHarvesterProperty("Modulo", module);
     	entity.addCustomData("acquisition-method", "Internally Developed");
-    	entity.addCustomData("dbmss", "[Oracle Database Server 1]");
     	entity.setKeywords(keywords);
-    	    	
+    	
 		return entity;
 	}
 	

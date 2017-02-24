@@ -15,16 +15,17 @@ import com.unicomer.oer.harvester.util.PropertiesLoader;
 public class YamlWriter {
 	private static MetadataLogger logger = MetadataManager.getLogger(YamlWriter.class);
 	private static PropertiesLoader prop = PropertiesLoader.getInstance();
-	private static String fileLocation = prop.getProperty("file.harvest-summary.location");
+	private static String fileLocation = "";
 	
 	public YamlWriter(){
 		
 	}
 	
-	public static void writeToYaml(Set<Entity> harvestedEntities) throws Exception{
+	public static void writeToYaml(Set<Entity> harvestedEntities, String serverType) throws Exception{
 		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 		try {
-        	fileLocation = fileLocation + "HarvestedAssets-"
+			fileLocation = prop.getProperty("file.harvest-summary.location");
+        	fileLocation = fileLocation + "Harvested-" + serverType + "-"
         			+ new SimpleDateFormat("yyyyMMddhhmmss").format(new Date())
         			+ ".yml";
         	
@@ -36,6 +37,5 @@ public class YamlWriter {
         	// Sleeps for 1 second to be sure that the filename will not be repeated at all
         	Thread.sleep(1000);
         }
-	}
-	
+	}	
 }

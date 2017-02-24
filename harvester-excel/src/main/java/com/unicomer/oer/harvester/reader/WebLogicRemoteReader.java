@@ -208,7 +208,7 @@ public class WebLogicRemoteReader implements MetadataReader {
 		
 		for(Set<Entity> entitySet : list){
 			if(entitySet != null && entitySet.size() > 0){
-				YamlWriter.writeToYaml(entitySet);
+				YamlWriter.writeToYaml(entitySet, prop.getProperty("weblogic.harvest-type"));
 			}
 		}
 		return list;

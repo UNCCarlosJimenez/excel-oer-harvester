@@ -170,7 +170,7 @@ public class SoaSuiteRemoteReader implements MetadataReader {
 
 		for(Set<Entity> entitySet : list){
 			if(entitySet != null && entitySet.size() > 0){
-				YamlWriter.writeToYaml(entitySet);
+				YamlWriter.writeToYaml(entitySet, prop.getProperty("soasuite.harvest-type"));
 			}
 		}
 		return list;
