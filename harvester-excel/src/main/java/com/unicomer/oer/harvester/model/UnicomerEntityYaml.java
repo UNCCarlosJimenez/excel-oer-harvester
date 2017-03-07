@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.flashline.util.StringUtils;
 import com.oracle.bpelModel.WsdlSummaryDocument;
 import com.oracle.oer.sync.framework.MetadataIntrospectionException;
-import com.oracle.oer.sync.framework.MetadataLogger;
 import com.oracle.oer.sync.framework.MetadataManager;
 import com.oracle.oer.sync.model.ArtifactEntity;
 import com.oracle.oer.sync.model.Entity;
@@ -27,7 +26,6 @@ import com.oracle.oer.sync.oer.client.component.name.AssetNamerImpl;
  */
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class UnicomerEntityYaml {
-	private MetadataLogger logger = MetadataManager.getLogger(UnicomerEntityYaml.class);
 	protected AssetNamerImpl namer = new AssetNamerImpl();
 	
 	protected List<URelationship> relationships = new ArrayList<URelationship>();

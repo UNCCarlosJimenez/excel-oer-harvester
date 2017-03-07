@@ -44,9 +44,9 @@ import com.unicomer.oer.harvester.writer.YamlWriter;
 public class JBossRemoteReader implements MetadataReader {
 	private static MetadataLogger logger = MetadataManager.getLogger(JBossRemoteReader.class);
 	private MetadataIntrospectionConfig config = null;
-	private String hostname = "";//"http://uinhsap1wldev.datacenter.milady.local:7091/";
-	private String username = "";//"weblogic";
-	private String password = "";//"Un1c0m3r";
+	private String hostname = "";
+	private String username = "";
+	private String password = "";
 	private int port = 0;
 	
 	PropertiesLoader prop = PropertiesLoader.getInstance();
