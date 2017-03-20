@@ -15,6 +15,7 @@ import com.oracle.oer.sync.framework.MetadataIntrospectionException;
 import com.oracle.oer.sync.framework.MetadataLogger;
 import com.oracle.oer.sync.framework.MetadataManager;
 import com.unicomer.oer.harvester.model.UnicomerEntity;
+import com.unicomer.oer.harvester.util.PropertiesLoader;
 import com.unicomer.oer.harvester.writer.UnicomerOERWriter;
 
 /**
@@ -22,6 +23,9 @@ import com.unicomer.oer.harvester.writer.UnicomerOERWriter;
  *
  */
 public class UnicomerArtifactSaver {
+	PropertiesLoader prop = PropertiesLoader.getInstance();
+	private String defVersion = prop.getProperty("default.version");
+	
 	private MetadataLogger logger = MetadataManager.getLogger(UnicomerArtifactSaver.class);
 	UnicomerOERWriter oerWriter;
 
@@ -40,7 +44,7 @@ public class UnicomerArtifactSaver {
 
 			Asset[] matches = null;
 			
-			matches = oerWriter.assetQueryByName(name);
+			matches = oerWriter.assetQueryByName(name, assetTypeID);
 			
 			if (matches!=null && matches.length > 1) {
 				logger.warn("Found more than one artifact matching " + name);
@@ -85,13 +89,14 @@ public class UnicomerArtifactSaver {
 				logger.debug(name + " no fue encontrado, se crea");
 				//Asset no encontrado, se crea
 				if (StringUtils.isEmpty(version)) {
-					version = "1.0";
+					version = defVersion;
 				}
 				
 				Asset artifactAsset = oerWriter.assetCreate(name, version, assetTypeID, entity, publishedDate);
 				logger.info("********************************oerWriter.assetCreate********************************");
 				logger.info("name: "+artifactAsset.getName());
 				logger.info("version: "+artifactAsset.getVersion());
+				logger.info("type: "+artifactAsset.getTypeName());
 				
 				artifactAsset.setDescription(description);
 				oerWriter.setCategorizations(entity, artifactAsset);

@@ -14,12 +14,25 @@ public class PropertiesLoader {
 	public PropertiesLoader() {
 		load();
 	}
-
+	
+	public PropertiesLoader(String location) {
+		load(location);
+	}
+	
 	public static PropertiesLoader getInstance() {
 		if (instance == null)
 			synchronized (PropertiesLoader.class) {
 				if (instance == null)
 					instance = new PropertiesLoader();
+			}
+		return instance;
+	}
+	
+	public static PropertiesLoader getInstance(String location) {
+		if (instance == null)
+			synchronized (PropertiesLoader.class) {
+				if (instance == null)
+					instance = new PropertiesLoader(location);
 			}
 		return instance;
 	}
@@ -30,6 +43,21 @@ public class PropertiesLoader {
 					.getResourceAsStream(CONF_SERVICE_PROPERTIES);
 			if (in == null)
 				properties.load(new FileInputStream(CONF_SERVICE_PROPERTIES));
+			else
+				properties.load(in);
+		} catch (IOException e) {
+			System.err.println("unicomer-harvester: Error cargando archivo de propiedades " + e.getMessage());
+			e.printStackTrace();
+		}
+		return properties;
+	}
+	
+	public Properties load(String location) {
+		try {
+			InputStream in = Thread.currentThread().getContextClassLoader()
+					.getResourceAsStream(location);
+			if (in == null)
+				properties.load(new FileInputStream(location));
 			else
 				properties.load(in);
 		} catch (IOException e) {

@@ -181,10 +181,11 @@ public class JBossRemoteReader implements MetadataReader {
     	
     	String[] keywords = {"JBoss server","AIX", "InHouse"};
     	Entity entity = new UnicomerEntity(serverAssetType, serverName, serverName + " - JBoss", description.toString(), productVersion,  ArtifactAlgorithm.DEFAULT);
-    	entity.addCategorization("LineOfBusiness", "InHouse : InHouse Infrastructure");
-    	entity.addCategorization("AssetLifecycleStage", "Stage 4 - Release");
+    	entity.addCategorization("LineOfBusiness", prop.getProperty("default.line-of-business"));
+    	entity.addCategorization("AssetLifecycleStage", prop.getProperty("default.asset-lifecycle-stage"));
     	entity.addCategorization("ApplicationServer", "JBoss " + productName);
-    	entity.addCategorization("Technology", "Java EE");
+    	entity.addCategorization("Technology", prop.getProperty("default.technology"));
+    	entity.addCategorization("Region", prop.getProperty("default.region"));
     	entity.addCustomData("product-version", productVersion);
     	entity.addCustomData("start-details", jvmDetails.toString());
     	
@@ -285,11 +286,13 @@ public class JBossRemoteReader implements MetadataReader {
 		Entity entity = new UnicomerEntity(deploymentAssetType, name, name, "", version,  ArtifactAlgorithm.DEFAULT);
 		entity.setDescription("Aplicacion de " + module + " cargada con Harvester, de tipo " +  extension);
 		entity.addRelationship(server, defAppToServerRelation, false);
-		entity.addCategorization("LineOfBusiness", "InHouse : InHouse Software");
-    	entity.addCategorization("AssetLifecycleStage", "Stage 4 - Release");
-    	entity.addCategorization("Technology", "Java EE");
+		entity.addCategorization("LineOfBusiness", prop.getProperty("default.line-of-business"));
+    	entity.addCategorization("AssetLifecycleStage", prop.getProperty("default.asset-lifecycle-stage"));
+    	entity.addCategorization("Technology", prop.getProperty("default.technology"));
+    	entity.addCategorization("Region", prop.getProperty("default.region"));
     	entity.addHarvesterProperty("Modulo", module);
-    	entity.addCustomData("acquisition-method", "Internally Developed");
+    	entity.addHarvesterProperty("Harvester Description", prop.getProperty("default.harvester-description"));
+    	entity.addCustomData("acquisition-method", prop.getProperty("default.acquisition-method"));
     	entity.setKeywords(keywords);
     	
 		return entity;

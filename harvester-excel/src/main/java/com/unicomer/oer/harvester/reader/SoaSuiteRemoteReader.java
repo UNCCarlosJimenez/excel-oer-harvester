@@ -52,10 +52,13 @@ public class SoaSuiteRemoteReader implements MetadataReader {
 	private String compositesMBean = prop.getProperty("soasuite.composites-mbean"); 
 	private String restBinding = prop.getProperty("soasuite.binding-type.rest");
 	private String endpointAttribute = prop.getProperty("soasuite.custom-data.endpoint");
+	private String environmentAttribute =  prop.getProperty("soasuite.custom-data.environment");
+	private String transportProtocol =  prop.getProperty("soasuite.custom-data.transport-protocol");
 	private String deploymentAssetType = prop.getProperty("soasuite.deployment.asset-type");
 	private String serverAssetType = prop.getProperty("soasuite.server.asset-type"); 
-	private String defVersion = prop.getProperty("default.version");
+	private String soaVersion = prop.getProperty("soasuite.soa-version");
 	private String defAppToServerRelation = prop.getProperty("default.app-to-server-relation");
+	private String defEnvironment = prop.getProperty("default.environment");
 	
 	@SuppressWarnings("resource")
 	public static void main(String[] args) throws Exception {
@@ -101,8 +104,22 @@ public class SoaSuiteRemoteReader implements MetadataReader {
 			
 			ObjectName serverQuery = new ObjectName(rootMbean);
 			String serverName = (String) mbconn2.getAttribute(serverQuery, "ServerName");
-			Entity serverEntity = new UnicomerEntity(serverAssetType, serverName, serverName, serverName, defVersion,
-					ArtifactAlgorithm.DEFAULT);
+			
+			Entity serverEntity = new UnicomerEntity(serverAssetType, serverName, serverName, serverName, soaVersion, ArtifactAlgorithm.DEFAULT);
+			serverEntity.addCategorization("LineOfBusiness", prop.getProperty("default.line-of-business"));
+			serverEntity.addCategorization("AssetLifecycleStage", prop.getProperty("default.asset-lifecycle-stage"));
+			serverEntity.addCategorization("ApplicationServer", prop.getProperty("soasuite.application-server"));
+			serverEntity.addCategorization("Technology", prop.getProperty("default.technology"));
+			serverEntity.addCategorization("Region", prop.getProperty("default.region"));
+			serverEntity.addCustomData("product-version", soaVersion);
+			
+			serverEntity.addCustomData("host-information/host/hostname", new URI(urlString).getHost());
+	    	serverEntity.addCustomData("host-information/host/operative-system", "AIX");
+	    	serverEntity.addCustomData("host-information/host/operative-system-version", "7.1");
+	    	serverEntity.addCustomData("host-information/host/cpu-info", "12 cores");
+	    	serverEntity.addCustomData("host-information/host/memory-info", "10 GB");
+	    	serverEntity.addCustomData("host-information/host/storage-capacity", "235 GB");
+			
 			serverMap.put(serverName, serverEntity);
 
 			Set<ObjectName> compositeNames = new LinkedHashSet<ObjectName>();
@@ -128,11 +145,17 @@ public class SoaSuiteRemoteReader implements MetadataReader {
 						compositeMap.remove(name);
 					} else {
 						// Se crea la referencia
-						compositeEntity = new UnicomerEntity(deploymentAssetType, name, name, name, revision,
-								ArtifactAlgorithm.DEFAULT);
-						compositeEntity.addCategorization("AssetFunction", "Creacion manual");
+						compositeEntity = new UnicomerEntity(deploymentAssetType, name, name, name, revision, ArtifactAlgorithm.DEFAULT);
+						compositeEntity.setDescription("Composite " + name + " de SOA Suite");						
 					}
 					compositeEntity.addRelationship(serverEntity, defAppToServerRelation, false);
+					compositeEntity.addCategorization("LineOfBusiness", prop.getProperty("default.line-of-business"));
+					compositeEntity.addCategorization("AssetLifecycleStage", prop.getProperty("default.asset-lifecycle-stage"));
+					compositeEntity.addCategorization("Technology", prop.getProperty("default.technology"));
+					compositeEntity.addCategorization("Region", prop.getProperty("default.region"));
+					compositeEntity.addHarvesterProperty("Modulo", partition);
+					compositeEntity.addHarvesterProperty("Harvester Description", prop.getProperty("default.harvester-description"));
+					compositeEntity.addCustomData("acquisition-method", prop.getProperty("default.acquisition-method"));
 					compositeEntity.addCustomData("partition", partition);
 					
 					try {
@@ -147,11 +170,16 @@ public class SoaSuiteRemoteReader implements MetadataReader {
 									endpoint = (String) mbconn2.getAttribute(binding, "Location");
 								} else {
 									endpoint = (String) mbconn2.getAttribute(binding, "EndpointAddressURI");
-
 								}
 							}
-							if (endpoint != null && !endpoint.isEmpty())
+							if (endpoint != null && !endpoint.isEmpty()){
+								compositeEntity.addCustomData(transportProtocol, prop.getProperty("soasuite.transport-protocol.binding"));
+								
+								compositeEntity.addCustomData(environmentAttribute, defEnvironment);
 								compositeEntity.addCustomData(endpointAttribute, endpoint);
+							}else{
+								compositeEntity.addCustomData(transportProtocol, prop.getProperty("soasuite.transport-protocol.queue"));
+							}
 						}
 					} catch (Exception e) {
 						logger.fatal(e.getMessage());

@@ -29,6 +29,7 @@ public class UnicomerRemoteReader implements MetadataReader {
 	private String weblogicHarvestType = prop.getProperty("weblogic.harvest-type");
 	private String fileHarvestType = prop.getProperty("file.harvest-type");
 	private String websphereHarvestType = prop.getProperty("websphere.harvest-type");
+	private String brokerHarvestType = prop.getProperty("broker.harvest-type");
 	private String harvestType = "";
 	
 	public UnicomerRemoteReader(){
@@ -56,6 +57,8 @@ public class UnicomerRemoteReader implements MetadataReader {
 			actualReader = new WebLogicRemoteReader();
 		}else if(harvestType.equals(websphereHarvestType)){
 			actualReader = new WebSphereRemoteReader();
+		}else if(harvestType.equals(brokerHarvestType)){
+			actualReader = new ExcelBrokerRemoteReader();
 		}else {
 			logger.error("An implementation class for " + harvestType + " server type is not available...");
 		}

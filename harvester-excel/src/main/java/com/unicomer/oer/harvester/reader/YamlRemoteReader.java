@@ -61,7 +61,7 @@ public class YamlRemoteReader implements MetadataReader {
 					entitySet = new HashSet<Entity>();
 					for(UnicomerEntityYaml harvestedEntity : harvestedEntities){
 	        			Entity convertedEntity = fileToInterfaceConverter(harvestedEntity);
-	        			logger.info("Converted entity: " + convertedEntity.getName() + " (" + convertedEntity.getVersion()+ ")");
+	        			logger.info("Converted entity: " + convertedEntity.getName() + " (" + convertedEntity.getVersion()+ ") as " + convertedEntity.getAssetType());
 	        			entitySet.add(convertedEntity);
 	            	}
 					

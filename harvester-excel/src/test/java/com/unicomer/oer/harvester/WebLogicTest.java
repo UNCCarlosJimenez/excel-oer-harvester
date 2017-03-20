@@ -1,17 +1,18 @@
 /**
  * 
  */
-package com.unicomer.oer.harvester.reader;
+package com.unicomer.oer.harvester;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -20,14 +21,23 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import com.oracle.artifact.ArtifactAlgorithm;
-import com.oracle.oer.integration.harvester.RemoteQuery;
-import com.oracle.oer.sync.framework.MetadataIntrospectionConfig;
 import com.oracle.oer.sync.framework.MetadataIntrospectionException;
 import com.oracle.oer.sync.framework.MetadataLogger;
 import com.oracle.oer.sync.framework.MetadataManager;
-import com.oracle.oer.sync.framework.MetadataReader;
 import com.oracle.oer.sync.model.Entity;
 import com.unicomer.oer.harvester.model.UnicomerEntity;
 import com.unicomer.oer.harvester.util.PropertiesLoader;
@@ -39,14 +49,13 @@ import weblogic.utils.StringUtils;
  * @author carlosj_rodriguez
  *
  */
-public class WebLogicRemoteReader implements MetadataReader {
-	private static MetadataLogger logger = MetadataManager.getLogger(WebLogicRemoteReader.class);
-	private MetadataIntrospectionConfig config = null;
-	private String urlString = "";//"http://uinhsap1wldev.datacenter.milady.local:7091/";
-	private String username = "";//"weblogic";
-	private String password = "";//"Un1c0m3r";
+public class WebLogicTest {
+	private static MetadataLogger logger = MetadataManager.getLogger(WebLogicTest.class);
+	private String urlString = "";
+	private String username = "";
+	private String password = "";
 	
-	PropertiesLoader prop = PropertiesLoader.getInstance();
+	PropertiesLoader prop = PropertiesLoader.getInstance("C:\\Users\\carlosj_rodriguez\\work\\exec\\harvester\\unicomer-harvester.properties");
 	private String jndiPath = prop.getProperty("weblogic.jndi-path");
 	private String rootMBean =  prop.getProperty("weblogic.root-mbean");
 //	private String datasourceAssetType = prop.getProperty("weblogic.datasource.asset-type");	
@@ -57,36 +66,29 @@ public class WebLogicRemoteReader implements MetadataReader {
 	private String defAppToServerRelation = prop.getProperty("default.app-to-server-relation");
 	private String defLibToAppRelation = prop.getProperty("default.lib-to-app-relation");
 	
-	@SuppressWarnings("resource")
 	public static void main(String[] args) throws Exception {
-		WebLogicRemoteReader reader = new WebLogicRemoteReader();
+		String valor = "ASBCHGPRCLSOLUNI01";
+		System.out.println((valor.substring(valor.length() -2, valor.length())));
+		System.out.println(Integer.valueOf(valor.substring(valor.length() -2, valor.length())));
 		
-		Iterator<Set<Entity>> it= reader.read().iterator();
-		while (it.hasNext()){
-			logger.info("Activos obtenidos:");
-			Set<Entity> entities = it.next();
-			for(Entity entity : entities){
-				logger.info("Entity name: " + entity.getDescription());
-			}
-		}
+//		WebLogicTest reader = new WebLogicTest();
+//		reader.read();
+//		
+//		Iterator<Set<Entity>> it= reader.read().iterator();
+//		while (it.hasNext()){
+//			logger.info("Activos obtenidos:");
+//			Set<Entity> entities = it.next();
+//			for(Entity entity : entities){
+//				logger.info("Entity name: " + entity.getDescription());
+//			}
+//		}
 	}
-	
-	public WebLogicRemoteReader(){
-		try{
-			MetadataManager metadataManager = MetadataManager.getInstance();
-		    this.config = metadataManager.getConfigManager();
-		    RemoteQuery remote = this.config.getRemoteQuery();
-		    
-		    urlString = remote.getUri();
-			username = remote.getCredentials().getUser();
-			password = remote.getCredentials().getPassword();
-		}catch(Exception e){
-			logger.error("Failure staring WebLogicDeploymentRemoteReader... " + e.getMessage());
-			
-			urlString = "http://uinhsap1wldev.datacenter.milady.local:7091/";
-			username = "weblogic";
-			password = "Un1c0m3r";
-		}
+
+	public WebLogicTest() {
+		urlString = "http://uinhsap1wldev.datacenter.milady.local:7091/";
+		username = "weblogic";
+		password = "Un1c0m3r";
+
 	}
 	
 	public List<Set<Entity>> read() throws Exception {
@@ -117,32 +119,32 @@ public class WebLogicRemoteReader implements MetadataReader {
 				
 				logger.info("> " + serverName);
 				if (!serverName.equals(prop.getProperty("weblogic.admin-managed-server"))) {
-					serverEntity = new UnicomerEntity(serverAssetType, serverName, serverName, serverName, productVersion, ArtifactAlgorithm.DEFAULT);
+					serverEntity = new UnicomerEntity(serverAssetType, serverName, serverName, serverName, defVersion, ArtifactAlgorithm.DEFAULT);
 					serverEntity.addCategorization("LineOfBusiness", prop.getProperty("default.line-of-business"));
 					serverEntity.addCategorization("AssetLifecycleStage", prop.getProperty("default.asset-lifecycle-stage"));
 					serverEntity.addCategorization("ApplicationServer", prop.getProperty("weblogic.application-server"));
 					serverEntity.addCategorization("Technology", prop.getProperty("default.technology"));
 					serverEntity.addCategorization("Region", prop.getProperty("default.region"));
 					serverEntity.addCustomData("product-version", productVersion);
-
+					
 					serverEntity.addCustomData("host-information/host/hostname", new URI(urlString).getHost());
-					serverEntity.addCustomData("host-information/host/operative-system", "AIX");
-					serverEntity.addCustomData("host-information/host/operative-system-version", "7.1");
-					serverEntity.addCustomData("host-information/host/cpu-info", "12 cores");
-					serverEntity.addCustomData("host-information/host/memory-info", "10 GB");
-					serverEntity.addCustomData("host-information/host/storage-capacity", "235 GB");
-
+			    	serverEntity.addCustomData("host-information/host/operative-system", "AIX");
+			    	serverEntity.addCustomData("host-information/host/operative-system-version", "7.1");
+			    	serverEntity.addCustomData("host-information/host/cpu-info", "12 cores");
+			    	serverEntity.addCustomData("host-information/host/memory-info", "10 GB");
+			    	serverEntity.addCustomData("host-information/host/storage-capacity", "235 GB");
+					
 					serverMap.put(serverName, serverEntity);
-
-					// logger.info(" Aplicaciones desplegadas:");
+					
+//					logger.info("  Aplicaciones desplegadas:");
 					ObjectName[] applicationRuntimes = (ObjectName[]) mbconn.getAttribute(serverRuntime, "ApplicationRuntimes");
-					for (ObjectName applicationRuntime : applicationRuntimes) {
+					for (ObjectName applicationRuntime:applicationRuntimes) {
 						String applicationName = (String) mbconn.getAttribute(applicationRuntime, "Name");
-						if (applicationMap.containsKey(applicationName)) {
-							// Se actualiza la referencia
+						if (applicationMap.containsKey(applicationName)){
+							//Se actualiza la referencia
 							applicationEntity = (UnicomerEntity) applicationMap.get(applicationName);
 							applicationMap.remove(applicationName);
-						} else {
+						}else{
 							// Se crea la referencia
 							applicationEntity = new UnicomerEntity(deploymentAssetType, applicationName, applicationName, applicationName, defVersion, ArtifactAlgorithm.DEFAULT);
 						}
@@ -156,7 +158,7 @@ public class WebLogicRemoteReader implements MetadataReader {
 						
 						applicationMap.put(applicationName, applicationEntity);
 						logger.info("    " + applicationName);
-
+						
 						ObjectName[] componentRuntimes = (ObjectName[]) mbconn.getAttribute(applicationRuntime, "ComponentRuntimes");
 						
 						for (ObjectName componentRuntime:componentRuntimes) {
@@ -179,21 +181,22 @@ public class WebLogicRemoteReader implements MetadataReader {
 							}
 						}
 					}
-
+					
 					logger.info("Librerias desplegadas:");
 					ObjectName[] libraryRuntimes = (ObjectName[]) mbconn.getAttribute(serverRuntime, "LibraryRuntimes");
-
+					
 					for (ObjectName library : libraryRuntimes) {
 						String libraryName = (String) mbconn.getAttribute(library, "LibraryName");
 						String libraryVersion = (String) mbconn.getAttribute(library, "SpecificationVersion");
-
-						if (libraryMap.containsKey(libraryName)) {
-							// Se actualiza la referencia
+						
+						if (libraryMap.containsKey(libraryName)){
+							//Se actualiza la referencia
 							libraryEntity = (UnicomerEntity) libraryMap.get(libraryName);
 							libraryMap.remove(libraryName);
-						} else {
+						}else{
 							// Se crea la referencia
 							libraryEntity = new UnicomerEntity(librarytAssetType, libraryName, libraryName, libraryName, libraryVersion, ArtifactAlgorithm.DEFAULT);
+							libraryEntity.addCategorization("AssetFunction", "Creacion manual");
 						}
 						libraryEntity.addRelationship(serverEntity, defAppToServerRelation, false);
 						libraryEntity.addCategorization("LineOfBusiness", prop.getProperty("default.line-of-business"));
@@ -202,7 +205,7 @@ public class WebLogicRemoteReader implements MetadataReader {
 						libraryEntity.addCategorization("Region", prop.getProperty("default.region"));
 						libraryEntity.addHarvesterProperty("Harvester Description", prop.getProperty("default.harvester-description"));
 						libraryEntity.addCustomData("acquisition-method", prop.getProperty("default.acquisition-method"));
-						
+											
 						libraryMap.put(libraryName, libraryEntity);
 						logger.info("    " + libraryName);
 						
@@ -213,7 +216,6 @@ public class WebLogicRemoteReader implements MetadataReader {
 							libraryEntity.addRelationship(applicationMap.get(referenceName), defLibToAppRelation, false);
 						}
 					}
-
 				}
 			}
 			
@@ -276,6 +278,47 @@ public class WebLogicRemoteReader implements MetadataReader {
 
 	public void close() throws IOException {
 				
+	}
+		
+	private String customDataArray(String valueOne, String valueTwo){
+		String result = "";
+		try {
+            DocumentBuilderFactory dFact = DocumentBuilderFactory.newInstance();
+            DocumentBuilder build = dFact.newDocumentBuilder();
+            Document doc = build.newDocument();
+                        
+            Element root = doc.createElement("url-per-environment");
+            doc.appendChild(root);
+            
+//        	Element urlPerEnvironment = doc.createElement("url-per-environment");
+        	
+        	Element environmentName = doc.createElement("environment-name");
+            environmentName.setTextContent(valueOne);
+            
+            Element environmentUri = doc.createElement("uri");
+            environmentUri.setTextContent(valueTwo);
+            root.appendChild(environmentName);
+            root.appendChild(environmentUri);
+            
+//            root.appendChild(urlPerEnvironment);
+            
+            TransformerFactory tFact = TransformerFactory.newInstance();
+            Transformer trans = tFact.newTransformer();
+            trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            
+            StringWriter writer = new StringWriter();
+            StreamResult stream = new StreamResult(writer);
+            DOMSource source = new DOMSource(doc);
+            
+            trans.transform(source, stream);
+            result = writer.toString();
+        } catch (TransformerException ex) {
+            System.out.println("Error outputting document");
+        } catch (ParserConfigurationException ex) {
+            System.out.println("Error building document");
+        }
+		
+		return result;
 	}
 
 }

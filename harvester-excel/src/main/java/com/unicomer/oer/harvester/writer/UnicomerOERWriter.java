@@ -373,9 +373,9 @@ public class UnicomerOERWriter extends OERWriter {
 		return asset;
 	}
 	
-	public Asset[] assetQueryByName(String assetName) throws MetadataIntrospectionException {
+	public Asset[] assetQueryByName(String assetName, long assetTypeId) throws MetadataIntrospectionException {
 		try {
-			return this.alerQueryTr.assetQueryByName(assetName);
+			return this.alerQueryTr.assetQuery(assetName, assetTypeId);
 		} catch (Exception e) {
 			throw new MetadataIntrospectionException(e);
 		}

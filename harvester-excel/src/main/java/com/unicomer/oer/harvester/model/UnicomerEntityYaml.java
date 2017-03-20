@@ -28,21 +28,21 @@ import com.oracle.oer.sync.oer.client.component.name.AssetNamerImpl;
 public class UnicomerEntityYaml {
 	protected AssetNamerImpl namer = new AssetNamerImpl();
 	
-	protected List<URelationship> relationships = new ArrayList<URelationship>();
-	protected List<UAttribute> harvesterProperties = new ArrayList<UAttribute>();
+	protected String id;
+	protected String name;
+	protected String version;
+	protected String description;
+	protected String assetType;
+	protected String[] mKeywords;
 	protected List<UAttribute> categorizations = new ArrayList<UAttribute>();
 	protected Map<String, String> customData = new LinkedHashMap<String, String>();
+	protected List<URelationship> relationships = new ArrayList<URelationship>();
+	protected boolean relationshipsProcessed = false;
+	protected List<UAttribute> harvesterProperties = new ArrayList<UAttribute>();
+	protected String namespace;
 	protected WsdlSummaryDocument.WsdlSummary wsdlSummary;
 	protected String summaryXML;
 	protected List<ManifestEntry> manifestEntries = new ArrayList<ManifestEntry>();
-	protected String id;
-	protected String name;
-	protected String namespace;
-	protected String description;
-	protected String version;
-	protected String assetType;
-	protected boolean relationshipsProcessed = false;
-	protected String[] mKeywords;
 	protected UArtifactAlgorithm artifactAlgorithm;
 	
 	public UnicomerEntityYaml(){

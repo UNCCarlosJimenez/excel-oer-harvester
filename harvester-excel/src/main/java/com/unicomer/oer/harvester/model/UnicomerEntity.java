@@ -3,6 +3,7 @@
  */
 package com.unicomer.oer.harvester.model;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.oracle.artifact.ArtifactAlgorithm;
 import com.oracle.oer.sync.model.Entity;
 import com.oracle.oer.sync.model.EntityBase;
@@ -11,6 +12,9 @@ import com.oracle.oer.sync.model.EntityBase;
  * @author carlosj_rodriguez
  *
  */
+@JsonPropertyOrder(alphabetic=true, value={ "id", "name", "description", "version", "assetType", "categorizations", "customData", "keywords",
+		"relationships", "harvesterProperties", "relationshipsProcessed", "artifactAlgorithm", "namespace",
+		"manifestEntries", "wsdlSummary", "summaryXML" })
 public class UnicomerEntity extends EntityBase implements Entity {
 	protected ArtifactAlgorithm artifactAlgorithm;
 	

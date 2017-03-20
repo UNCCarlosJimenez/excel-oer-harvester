@@ -1,4 +1,4 @@
-package com.unicomer.oer.harvester.excel;
+package com.unicomer.oer.harvester;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
