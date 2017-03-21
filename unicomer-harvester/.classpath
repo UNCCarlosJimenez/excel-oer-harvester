@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="target/classes" path="src/main/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/activation-1.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/adf-share-base-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/adf-share-ca-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/adf-share-support-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/adfbcsvc-share-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/adflogginghandler-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/aler-axis-1.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/aler-axis-jaxrpc-1.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/cache-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/client.bpel-schemas.jar"/>
+	<classpathentry kind="lib" path="lib/client.harvester.jar"/>
+	<classpathentry kind="lib" path="lib/client.rex-tr.jar"/>
+	<classpathentry kind="lib" path="lib/com.bea.core.management.core_2.8.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-discovery-0.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/components.common.jar"/>
+	<classpathentry kind="lib" path="lib/components.encryptedpassword.jar"/>
+	<classpathentry kind="lib" path="lib/components.flashtrax.jar"/>
+	<classpathentry kind="lib" path="lib/components.log4fl.jar"/>
+	<classpathentry kind="lib" path="lib/components.md5sum.jar"/>
+	<classpathentry kind="lib" path="lib/components.soa11g-schemas.jar"/>
+	<classpathentry kind="lib" path="lib/components.soa12c-schemas.jar"/>
+	<classpathentry kind="lib" path="lib/components.xmlutil.jar"/>
+	<classpathentry kind="lib" path="lib/components.xqltool.jar"/>
+	<classpathentry kind="lib" path="lib/core.jar"/>
+	<classpathentry kind="lib" path="lib/cryptoj_5.0.jar"/>
+	<classpathentry kind="lib" path="lib/dms-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/fabric-common-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/fabric-runtime-11.1.1.6.jar"/>
+	<classpathentry kind="lib" path="lib/fabric-runtime-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/fabric-url-handler_11.1.1-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/http_client-12.1.3.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/jdom-1.0-beta10.jar"/>
+	<classpathentry kind="lib" path="lib/jmxframework-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/jmxspi-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/jrf-api-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/jsp-el-api-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/jsr173-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/mail-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/management.core-10.3.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/management.j2ee-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/mdsrt-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/ojdbc6-11.1.0.7.0.jar"/>
+	<classpathentry kind="lib" path="lib/ojdbc6-11.2.0.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/ojdl-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/oracle-soa-client-api-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/oracle.ucp_11.1.0-11.2.0.3.0.jar"/>
+	<classpathentry kind="lib" path="lib/oramds-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/orawsdl-11.1.1.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/orawsdl-12.1.3.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/policy-api-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/saaj-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/sdo-api-11.1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/share-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/soa-infra-mgmt-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/soa-infra-mgmt-12.1.3.0.jar"/>
+	<classpathentry kind="lib" path="lib/soap-2.2.jar"/>
+	<classpathentry kind="lib" path="lib/webserviceclient+ssl-10.3.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/wlcipher_1.0.jar"/>
+	<classpathentry kind="lib" path="lib/wlclient-10.3.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/wlclient-10.3.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/wlfullclient-10.3.3.0.jar"/>
+	<classpathentry kind="lib" path="lib/wlfullclient-10.3.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/wljmsclient-10.3.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/wljmsclient-10.3.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/wljmxclient-10.3.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/wljmxclient-10.3.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/wls-api-10.3.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/wls-api-10.3.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/wsm-policy-core-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/wsserver-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/xalan-2.5.0.jar"/>
+	<classpathentry kind="lib" path="lib/xercesImpl-2.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/xml-security-1.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/xmlbeans-2.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/xmlef-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/xmlParserAPIs-2.4.0.jar"/>
+	<classpathentry kind="lib" path="lib/xmlparserv2-11.1.1.7.jar"/>
+	<classpathentry kind="lib" path="lib/xmlpublic-1.0.jar"/>
+	<classpathentry kind="lib" path="lib-websphere/com.ibm.ws.ejb.thinclient_7.0.0.jar"/>
+	<classpathentry kind="lib" path="lib-websphere/ejb3exceptions.jar"/>
+	<classpathentry kind="lib" path="lib-websphere/com.ibm.ws.sib.client.thin.jms_7.0.0.jar"/>
+	<classpathentry kind="lib" path="lib-websphere/com.ibm.ws.admin.client_7.0.0.jar"/>
+	<classpathentry kind="lib" path="lib-websphere/ibmorb.jar"/>
+	<classpathentry kind="lib" path="lib-websphere/com.ibm.ws.orb_7.0.0.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>
